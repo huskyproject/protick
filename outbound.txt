@@ -1,0 +1,14 @@
+new outbound interface:
+
+supported outbounds:
+- Binkley Domain
+- new FD
+- perhaps arcmail attach
+- T-Mail fileboxes
+
+interface:
+- CheckBusy, SetBusy, UnSetBusy
+- SendFile, CheckFileSent
+- ArchiveName (BT: in outbound, TMail: in filebox, FD: subdirs in TicDir)
+- PurgeArchs (remove archives with zero length)
+

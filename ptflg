@@ -1,0 +1,108 @@
+#!/bin/sh
+
+# PTFLG - small filelist generator
+# uses protick.cfg, supports files.lng and writes ifcico-reqmap
+# written by Sascha Silbe <Sascha.Silbe@ldknet.org>
+# License: GNU General Public License (GPL)
+
+#
+# configuration 
+#
+
+PROGNAME=PTFLG
+PROGVERSION=1.0
+
+# path and filename of protick.cfg
+PROTICKCFG=/husky/cfg/protick.cfg
+# path and filename of filelist to be written
+FILELIST=/husky/files/24350424.all
+# path and filename of compressed (pkzip) filelist
+FILELISTZIP=/husky/files/24350424.zip
+# path and filename of temporary directory list
+DIRLIST=/husky/work/filearea.lst
+# path to strip from areanames
+STRIP=/husky/files/
+# filelist header
+HEADERFILE=/husky/cfg/filelist.head
+# ifcico request-map
+REQMAP=/husky/cfg/reqmap
+
+#
+# generate list of directories
+#
+
+cat ${PROTICKCFG} \
+| sed -e "/^\;/d" \
+| awk '
+  BEGIN { 
+    area="" 
+  } 
+  /^[Aa][Rr][Ee][Aa]=/ { 
+    area=$0 
+    sub(/[Aa][Rr][Ee][Aa]=/, "", area) 
+    next 
+  } 
+  /^[Pp][Aa][Tt][Hh]=/ { 
+    if (match(tolower(area), /^autocreate:[0-9]+$/) == 0) { 
+      sub(/[Pp][Aa][Tt][Hh]=/, "", $0) 
+      print $0 
+    } 
+  } 
+  {
+    next 
+  }
+' \
+| sort \
+> ${DIRLIST}
+
+#
+# generate filelist
+#
+
+# init files
+echo > ${REQMAP}
+
+# copy static header
+cp ${HEADERFILE} ${FILELIST}
+
+# process areas
+for f in `cat ${DIRLIST}` ; do 
+ f1=${f##${STRIP}} 
+
+# print areaname
+ echo
+ echo ------------------------------------------------------------------------------
+ echo Area $f1 
+ echo ------------------------------------------------------------------------------
+ echo
+ if [ -f $f/files.bbs ] ; then 
+  cat $f/files.bbs \
+  | awk '/[ +*]/ { print $0 }
+    { if (system("test -f '$f'/" $1) == 0) { print $1 " " "'$f'/" $1 >> "'${REQMAP}'" } }' 2> /dev/null 
+ fi
+ if [ -f $f/files.lng ] ; then
+  cat $f/files.lng \
+  | awk '{ print $2 " '$f'/" $1 }' \
+  >> ${REQMAP}
+ fi 
+
+# empty line after each area
+ echo
+ done \
+|sed "/^Area /s#/#.#g" \
+>> ${FILELIST}
+
+# write variable footer
+echo >> ${FILELIST}
+echo >> ${FILELIST}
+echo >> ${FILELIST}
+echo ============================================================================== >> ${FILELIST}
+echo >> ${FILELIST}
+echo Filelist generated on `date +%d.%m.%Y` by ${PROGNAME} ${PROGVERSION} >> ${FILELIST}
+echo >> ${FILELIST}
+echo ============================================================================== >> ${FILELIST}
+echo >> ${FILELIST}
+
+# compress filelist
+zip -9j ${FILELISTZIP} ${FILELIST}
+

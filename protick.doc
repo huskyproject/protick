@@ -454,7 +454,7 @@ Table of Contents
 >  [ANNOUNCEGROUPS]
 
    Now it's getting complex. But don't worry, it's easier as it looks like. :)
-   Here you define the AnnounceGroups. If a area is in such an announcegroup,
+   Here you define the AnnounceGroups. If an area is in such an announcegroup,
    a mail will be written into a message area saying which files have arrived.
    The numbers start at 1.
 
@@ -483,6 +483,14 @@ Table of Contents
 
    The mail is posted to an Echomail area. An origin line is generated,
    the Pvt flag will NOT be set.
+
+>  HeaderFile=/husky/cfg/protick.ann.hdr
+
+   The content of this file is put in front of the mail
+
+>  FooterFile=/husky/cfg/protick.ann.ftr
+
+   Similar to HeaderFile, it is appended to the mail
 
 
 >  [PACKER]

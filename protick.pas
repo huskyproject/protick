@@ -1,5 +1,5 @@
 Program ProTick;
-{$I-}
+{$I-}{$Q-}
 {$IfDef SPEED}
 {$Else}
  {$IfDef VIRTUALPASCAL}
@@ -1133,7 +1133,15 @@ Var
                    If (Pos('LONGNAME:', s) = 1) then WriteLName(CurArea^.Path, Tic^.Name,
                     KillLeadingSpcs(KillTrailingSpcs(Copy(Tic^.Desc, 10, Length(Tic^.Desc)-9))))
                    Else If (Pos('ORIGINAL NAME:', s) = 1) then WriteLName(CurArea^.Path, Tic^.Name,
-                    KillLeadingSpcs(KillTrailingSpcs(Copy(Tic^.Desc, 15, Length(Tic^.Desc)-14))));
+                    KillLeadingSpcs(KillTrailingSpcs(Copy(Tic^.Desc, 15, Length(Tic^.Desc)-14))))
+                   Else
+                    Begin
+                    s := UpStr(Tic^.LDesc[2]);
+                    If (Pos('LONGNAME:', s) = 1) then WriteLName(CurArea^.Path, Tic^.Name,
+                     KillLeadingSpcs(KillTrailingSpcs(Copy(Tic^.Desc, 10, Length(Tic^.Desc)-9))))
+                    Else If (Pos('ORIGINAL NAME:', s) = 1) then WriteLName(CurArea^.Path, Tic^.Name,
+                     KillLeadingSpcs(KillTrailingSpcs(Copy(Tic^.Desc, 15, Length(Tic^.Desc)-14))));
+                    End;
                    End;
                   HDesc^[0] := #0;
                   PPos := 0;
@@ -1475,7 +1483,11 @@ Var
         Begin
         If Usr^.PackFiles then
           Begin
-          ALE.Addr := Usr^.Addr;
+          ALE.Addr.Zone := Usr^.Addr.Zone;
+          ALE.Addr.Net := Usr^.Addr.Net;
+          ALE.Addr.Node := Usr^.Addr.Node;
+          ALE.Addr.Point := Usr^.Addr.Point;
+          ALE.Addr.Domain := Usr^.Addr.Domain;
           ALE.FileName := FName;
           ALE.Del := False;
           ALE.PTFN := '';
@@ -1484,7 +1496,11 @@ Var
         Else Outbound^.SendFile(Usr, FName, ac_Nothing);
         If Usr^.PackTICs then
           Begin
-          ALE.Addr := Usr^.Addr;
+          ALE.Addr.Zone := Usr^.Addr.Zone;
+          ALE.Addr.Net := Usr^.Addr.Net;
+          ALE.Addr.Node := Usr^.Addr.Node;
+          ALE.Addr.Point := Usr^.Addr.Point;
+          ALE.Addr.Domain := Usr^.Addr.Domain;
           ALE.FileName := fn;
           ALE.Del := True;
           ALE.PTFN := '';
@@ -1522,7 +1538,11 @@ Var
     Begin
     If Usr^.PackFiles then
      Begin
-     ALE.Addr := Usr^.Addr;
+     ALE.Addr.Zone := Usr^.Addr.Zone;
+     ALE.Addr.Net := Usr^.Addr.Net;
+     ALE.Addr.Node := Usr^.Addr.Node;
+     ALE.Addr.Point := Usr^.Addr.Point;
+     ALE.Addr.Domain := Usr^.Addr.Domain;
      ALE.FileName := FName;
      ALE.Del := False;
      Write(ArcList, ALE);
@@ -2125,7 +2145,7 @@ Var
         Begin
         s1 := UpStr(GetTo);
         bo := False;
-        For i := 1 to Cfg^.NumMgrNames do 
+        For i := 1 to Cfg^.NumMgrNames do
          Begin
          j := Pos(UpStr(Cfg^.MgrNames[i]), s1);
          bo := bo or ((j > 0) and ((Length(s1) = (j+Length(Cfg^.MgrNames[i])-1))
@@ -2195,6 +2215,7 @@ Var
       ACC := ACC^.Next;
       ACC^.Next := NIL;
       Read(ArcList, ACC^.a);
+      If (Byte(Acc^.a.Addr.Domain[0]) > 20) then Acc^.a.Addr.Domain[0] := #20;
       End;
     {$I-} Close(ArcList); {$I+}
     If (IOResult <> 0) then
@@ -2602,6 +2623,37 @@ Procedure DispAnnList;
     End;
   End;
 
+Procedure MsgCopyFile(Msg: AbsMsgPtr; FName: String);
+Var
+ f: Text;
+ Error: Integer;
+ Line: String;
+
+ Begin
+ {sanity check}
+ If (FName = '') then exit;
+
+ Assign(f, FName);
+ {$I-} ReSet(f); {$I+}
+ Error := IOResult;
+ If (Error <> 0) then
+  Begin
+  LogSetCurLevel(LogHandle, 1);
+  LogWriteLn(LogHandle, 'Could not open file "'+FName+'"!');
+  Exit;
+  End;
+
+ While (not EOF(f)) do
+  Begin
+  ReadLn(f, Line);
+  {strip CR/LF}
+  While (Line[Length(Line)] in [#10, #13]) do Line[0] := Char(Byte(Line[0]) - 1);
+  Msg^.DoStringLn(Line);
+  End;
+
+ Close(f);
+ End;
+
 Procedure DoAnnounce;
 Var
   DoEndArea, DoEndFile: Boolean;
@@ -2720,8 +2772,7 @@ Var
         Else s := s + '0' + IntToStr(DT.Min);
         SetTime(s);
         DoKludgeLn(#01'MSGID: '+Addr2Str(CurAnnGroup^.FromAddr)+' '+GetMsgID);
-        DoStringLn('The following files were received at '+Cfg^.BBS+' today:');
-        DoStringLn('');
+        MsgCopyFile(AnnMsg, CurAnnGroup^.HeaderFile);
         DoString('Area: '+CurAnnArea^.Area);
         If (CurAnnArea^.Desc <> '') then DoStringLn(' ('+CurAnnArea^.Desc+')')
         Else DoStringLn('');
@@ -2809,6 +2860,8 @@ Var
           If CurAnnFile^.Next = NIL then DoEndFile := True Else CurAnnFile := CurAnnFile^.Next;
           Until DoEndFile;
 
+        DoStringLn('');
+        MsgCopyFile(AnnMsg, CurAnnGroup^.FooterFile);
         DoStringLn('');
         DoStringLn('--- ProTick'+Version);
         If (CurAnnGroup^.Typ = at_EchoMail) then
