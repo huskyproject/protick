@@ -21,9 +21,9 @@ protick$(EXE): $(PASFILES)
 
 clean:
 	-$(RM) *$(OBJ)
-        -$(RM) *$(TPU)
-        -$(RM) *$(LIB)
-        -$(RM) *~
+	-$(RM) *$(TPU)
+	-$(RM) *$(LIB)
+	-$(RM) *~
 
 distclean: clean
 	-$(RM) protick$(EXE) genkey$(EXE)
