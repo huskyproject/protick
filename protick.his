@@ -329,5 +329,6 @@ Version 0.8beta14
 
 Version 0.9beta1
 - changed LDescChar to LDescString
+- updated ptflg
 + preliminary fidoconfig-support
 

@@ -16,21 +16,33 @@ PROGVERSION=1.0
 PROTICKCFG=/husky/cfg/protick.cfg
 # path and filename of filelist to be written
 FILELIST=/husky/files/24350424.all
+# path and filename of temporary filelist
+TEMPFILELIST=/husky/work/24350424.all.tmp
 # path and filename of compressed (pkzip) filelist
 FILELISTZIP=/husky/files/24350424.zip
 # path and filename of temporary directory list
 DIRLIST=/husky/work/filearea.lst
-# path to strip from areanames
-STRIP=/husky/files/
+# fileareas basepath, will be stripped from areanames
+BASEPATH=/husky/file
 # filelist header
 HEADERFILE=/husky/cfg/filelist.head
 # ifcico request-map
 REQMAP=/husky/cfg/reqmap
+# temporary reqmap
+TEMPREQMAP=/husky/work/reqmap.tmp
+# binkley okfile
+OKFILE=/husky/cfg/okfile.lst
+# temporary okfile
+TEMPOKFILE=/husky/cfg/okfile.lst.tmp
+
+
+echo $PROGNAME V$PROGVERSION
 
 #
 # generate list of directories
 #
 
+echo generating dirlist
 cat ${PROTICKCFG} \
 | sed -e "/^\;/d" \
 | awk '
@@ -59,15 +71,21 @@ cat ${PROTICKCFG} \
 # generate filelist
 #
 
-# init files
-echo > ${REQMAP}
+echo generating temporary reqmap, filelist and okfile
 
-# copy static header
-cp ${HEADERFILE} ${FILELIST}
+# init files
+echo > ${TEMPREQMAP}
+echo @FILES $FILELIST > $TEMPOKFILE
+
+# copy static header to filelist
+cp ${HEADERFILE} ${TEMPFILELIST}
 
 # process areas
 for f in `cat ${DIRLIST}` ; do 
- f1=${f##${STRIP}} 
+ f1=${f##${BASEPATH}/} 
+
+# add entry to okfile
+ echo $f/\* >> $TEMPOKFILE
 
 # print areaname
  echo
@@ -78,31 +96,40 @@ for f in `cat ${DIRLIST}` ; do
  if [ -f $f/files.bbs ] ; then 
   cat $f/files.bbs \
   | awk '/[ +*]/ { print $0 }
-    { if (system("test -f '$f'/" $1) == 0) { print $1 " " "'$f'/" $1 >> "'${REQMAP}'" } }' 2> /dev/null 
+    { if (system("test -f '$f'/" $1) == 0) { print $1 " " "'$f'/" $1 >> "'${TEMPREQMAP}'" } }' 2> /dev/null 
  fi
  if [ -f $f/files.lng ] ; then
   cat $f/files.lng \
   | awk '{ print $2 " '$f'/" $1 }' \
-  >> ${REQMAP}
+  >> ${TEMPREQMAP}
  fi 
 
 # empty line after each area
  echo
  done \
 |sed "/^Area /s#/#.#g" \
->> ${FILELIST}
+>> ${TEMPFILELIST}
 
 # write variable footer
-echo >> ${FILELIST}
-echo >> ${FILELIST}
-echo >> ${FILELIST}
-echo ============================================================================== >> ${FILELIST}
-echo >> ${FILELIST}
-echo Filelist generated on `date +%d.%m.%Y` by ${PROGNAME} ${PROGVERSION} >> ${FILELIST}
-echo >> ${FILELIST}
-echo ============================================================================== >> ${FILELIST}
-echo >> ${FILELIST}
+echo >> ${TEMPFILELIST}
+echo >> ${TEMPFILELIST}
+echo >> ${TEMPFILELIST}
+echo ============================================================================== >> ${TEMPFILELIST}
+echo >> ${TEMPFILELIST}
+echo Filelist generated on `date +%d.%m.%Y` by ${PROGNAME} ${PROGVERSION} >> ${TEMPFILELIST}
+echo >> ${TEMPFILELIST}
+echo ============================================================================== >> ${TEMPFILELIST}
+echo >> ${TEMPFILELIST}
 
-# compress filelist
+echo copying temporary files to final ones
+cp $TEMPFILELIST $FILELIST
+cp $TEMPREQMAP $REQMAP
+cp $TEMPOKFILE $OKFILE
+
+echo removing temporary files
+rm $TEMPFILELIST $TEMPREQMAP $TEMPOKFILE $DIRLIST
+
+echo compressing filelist
 zip -9j ${FILELISTZIP} ${FILELIST}
 
+echo finished
