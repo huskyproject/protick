@@ -95,7 +95,7 @@ Procedure Syntax;
   WriteLn('TOSS                          - Process TICs');
   WriteLn('SCAN                          - Scan for Mails');
   WriteLn('HATCH                         - Hatch file');
-  WriteLn('NEWFILESHATCH                 - Hatch new files');
+  WriteLn('NEWFILESHATCH / NFH           - Hatch new files');
   WriteLn('MAINT                         - daily maintenance');
   WriteLn('PACK                          - create archives');
   WriteLn('CHECK                         - check config');
@@ -196,6 +196,7 @@ Var
     Else If (s = 'TOSS') then Command := s
     Else If (s = 'HATCH') then Command := s
     Else If (s = 'NEWFILESHATCH') then Command := s
+    Else If (s = 'NFH') then Command := 'NEWFILESHATCH'
     Else If (s = 'MAINT') then Command := s
     Else If (s = 'PACK') then Command := s
     Else If (s = 'CHECK') then Command := s
@@ -492,7 +493,7 @@ Var
         Delete(Line, 1, 4);
         Val('$' + KillLeadingSpcs(Line), Tic^.CRC, Error);
         LogSetCurLevel(LogHandle, 3);
-        LogWriteLn(LogHandle, 'CRC '+WordToHex(Tic^.CRC SHR 16)+ WordToHex(Tic^.CRC mod 65536));
+        LogWriteLn(LogHandle, 'CRC '+WordToHex(word(Tic^.CRC SHR 16))+ WordToHex(word(Tic^.CRC mod 65536)));
         End
       Else If (Pos('ORIGIN ', UpStr(Line)) = 1) or (Pos('ORIGIN:', UpStr(Line)) = 1) then
         Begin
@@ -700,50 +701,53 @@ Var
     End;
  {$EndIf}
 {$EndIf}
-  LogSetCurLevel(LogHandle, 5);
-  LogWriteLn(LogHandle, 'Searching for ARCs');
-  For i := 1 to Cfg^.NumArcNames do
-    Begin
-    FName := Cfg^.InBound + DirSep + Cfg^.ArcNames[i].FileName;
-    SRec.Name := FName;
-    FindFirst(FName, AnyFile, SRec);
-    While (DosError = 0) Do
-      Begin
-      LogSetCurLevel(LogHandle, 3);
-      LogWriteLn(LogHandle, 'Processing '+Cfg^.InBound+DirSep+SRec.Name);
-      If not UnPack(Cfg^.ArcNames[i].UnPacker, Cfg^.InBound+DirSep+
-       SRec.Name, Cfg^.InBound) then
+  If (Cfg^.NumArcNames > 0) then
+   Begin
+   LogSetCurLevel(LogHandle, 5);
+   LogWriteLn(LogHandle, 'Searching for ARCs');
+   For i := 1 to Cfg^.NumArcNames do
+     Begin
+     FName := Cfg^.InBound + DirSep + Cfg^.ArcNames[i].FileName;
+     SRec.Name := FName;
+     FindFirst(FName, AnyFile, SRec);
+     While (DosError = 0) Do
        Begin
-       LogSetCurLevel(LogHandle, 2);
-       LogWriteLn(LogHandle, 'Could not unpack "'+Cfg^.InBound+DirSep+
-        SRec.Name+'"!');
-       End
-      Else
-       Begin
-       Assign(f, Cfg^.InBound+DirSep+SRec.Name);
-       {$I-} Erase(f); {$I+}
-       If IOResult <> 0 then
-         Begin
-         LogSetCurLevel(LogHandle, 1);
-         LogWriteLn(LogHandle, 'Couldn''t erase "'+Cfg^.InBound+DirSep+
-          SRec.Name+'"');
-         End;
+       LogSetCurLevel(LogHandle, 3);
+       LogWriteLn(LogHandle, 'Processing '+Cfg^.InBound+DirSep+SRec.Name);
+       If not UnPack(Cfg^.ArcNames[i].UnPacker, Cfg^.InBound+DirSep+
+        SRec.Name, Cfg^.InBound) then
+        Begin
+        LogSetCurLevel(LogHandle, 2);
+        LogWriteLn(LogHandle, 'Could not unpack "'+Cfg^.InBound+DirSep+
+         SRec.Name+'"!');
+        End
+       Else
+        Begin
+        Assign(f, Cfg^.InBound+DirSep+SRec.Name);
+        {$I-} Erase(f); {$I+}
+        If IOResult <> 0 then
+          Begin
+          LogSetCurLevel(LogHandle, 1);
+          LogWriteLn(LogHandle, 'Couldn''t erase "'+Cfg^.InBound+DirSep+
+           SRec.Name+'"');
+          End;
+        End;
+       FindNext(SRec);
        End;
-      FindNext(SRec);
-      End;
 {$IfDef OS2}
-    FindClose(SRec);
+     FindClose(SRec);
 {$EndIf}
-    End;
-  If Debug then
-    Begin
-    WriteLn('<Return>');
-    ReadLn(s);
-    If (UpStr(s) = 'BREAK') then
-      Begin
-      Exit;
-      End;
-    End;
+     End;
+   If Debug then
+     Begin
+     WriteLn('<Return>');
+     ReadLn(s);
+     If (UpStr(s) = 'BREAK') then
+       Begin
+       Exit;
+       End;
+     End;
+   End;
   LogSetCurLevel(LogHandle, 5);
   LogWriteLn(LogHandle, 'Searching for TICs');
   New(Tic);
@@ -848,6 +852,7 @@ Var
                 Begin
                 LogSetCurLevel(LogHandle, 1);
                 LogWriteLn(LogHandle, 'No AutoCreate defaults for group '+IntToStr(CurUser^.ACGroup)+' found!');
+                Tic^.Bad := bt_UnknownArea;
                 End
               Else
                 Begin
@@ -998,8 +1003,8 @@ Var
                   AddSecEntry('Group', IntToStr(Group), '');
                   AddSecEntry('Level', IntToStr(Level), '');
                   AddSecEntry('Addr', Addr2Str(Addr), '');
-                  AddSecEntry('LastHatch', WordToHex(LastHatch SHR 16)+
-                   WordToHex(LastHatch mod 65536), '');
+                  AddSecEntry('LastHatch', WordToHex(word(LastHatch SHR 16))+
+                   WordToHex(word(LastHatch mod 65536)), '');
                   If (CostPerMB <> 0) Then AddSecEntry('CostPerMB', IntToStr(CostPerMB), '');
                   s := '';
                   For i := 1 to 255 do If i in AnnGroups then s := s + IntToStr(i) + ',';
@@ -1072,14 +1077,14 @@ Var
               Begin
               WriteLn;
               LogSetCurLevel(LogHandle, 2);
-              LogWriteLn(LogHandle, 'Incorrect CRC! File: '+ WordToHex(i SHR 16)+
-               WordToHex(i mod 65536)+', TIC: '+ WordToHex(Tic^.CRC SHR 16)+
-               WordToHex(Tic^.CRC mod 65536));
+              LogWriteLn(LogHandle, 'Incorrect CRC! File: '+ WordToHex(word(i SHR 16))+
+               WordToHex(word(i mod 65536))+', TIC: '+ WordToHex(word(Tic^.CRC SHR 16))+
+               WordToHex(word(Tic^.CRC mod 65536)));
               Tic^.Bad := bt_CRC;
               End
             Else
               Begin
-              If (Tic^.CRC <> 0) and ((CurArea^.Fpags and fa_CRC) = fa_CRC) then WriteLn(' OK');
+              If (Tic^.CRC <> 0) and ((CurArea^.Flags and fa_CRC) = fa_CRC) then WriteLn(' OK');
               If (((CurArea^.Flags and fa_Dupe) = fa_Dupe) and CheckForDupe(Tic) and DupeCheck) then
                 Begin
                 Tic^.Bad := bt_Dupe;
@@ -1174,6 +1179,10 @@ Var
                     Tic^.Path[Tic^.NumPath] := s;
                     LogSetCurLevel(LogHandle, 5);
                     LogWriteLn(LogHandle, 'Added Path "'+ Tic^.Path[Tic^.NumPath]+ '"');
+                    Inc(Tic^.NumSB);
+                    Tic^.SeenBy[Tic^.NumSB] := Tic^._To;
+                    LogSetCurLevel(LogHandle, 5);
+                    LogWriteLn(LogHandle, 'Added SeenBy "'+Addr2Str(Tic^._To)+'"');
                     End;
 {$IfDef FPC}
                   With Tic^._To do If (not CompAddr(Tic^._To, CurArea^.Addr)) or
@@ -1190,7 +1199,10 @@ Var
                     Tic^.Path[Tic^.NumPath] := s;
                     LogSetCurLevel(LogHandle, 5);
                     LogWriteLn(LogHandle, 'Added Path "'+ Tic^.Path[Tic^.NumPath]+ '"');
+                    Inc(Tic^.NumSB);
                     Tic^.SeenBy[Tic^.NumSB] := CurArea^.Addr;
+                    LogSetCurLevel(LogHandle, 5);
+                    LogWriteLn(LogHandle, 'Added SeenBy "'+Addr2Str(CurArea^.Addr)+'"');
                     End;
                   CurConnUser := CurArea^.Users;
                   If (CurConnUser <> NIL) then
@@ -1350,17 +1362,11 @@ Var
    ChMod(Cfg^.PTLst, FilePerm);
 {$EndIf}
    End;
-  WriteLn('calling WriteTossArea');
   WriteTossArea;
-  WriteLn('calling WriteBBSArea');
   WriteBBSArea;
-  WriteLn('calling WriteAutoArea');
   WriteAutoArea;
-  WriteLn('calling DoAnnounce');
   DoAnnounce;
-  WriteLn('calling DoNMAnn');
   DoNMAnn;
-  WriteLn('exiting Toss');
   End;
 
 Procedure SendTic(Usr: PUser; Tic: PTick; FName: String);
@@ -1438,18 +1444,18 @@ Var
       Write(f, 'File '+ Name+#13#10);
       If (Desc <> '') then Write(f, 'Desc '+Desc+#13#10);
       If (NumLDesc > 0) then For i := 1 to NumLDesc do Write(f, 'LDesc '+LDesc[i]+#13#10);
-      If (CRC <> 0) then Write(f, 'CRC '+WordToHex(CRC SHR 16)+
-       WordToHex(CRC mod 65536)+#13#10);
+      If (CRC <> 0) then Write(f, 'CRC '+WordToHex(word(CRC SHR 16))+
+       WordToHex(word(CRC mod 65536))+#13#10);
       Write(f, 'Created by ProTick'+Version+#13#10);
       For i := 1 to NumPath do Write(f, 'Path '+Path[i]+#13#10);
       For i := 1 to NumSB do Write(f, 'SeenBy '+Addr2Str(SeenBy[i])+#13#10);
       If (Usr^.Pwd <> '') then Write(f, 'PW ' + Usr^.Pwd+#13#10);
       If (ReleaseTime > 0) then Write(f, 'ReleaseTime '+
-       WordToHex(ReleaseTime SHR 16)+WordToHex(ReleaseTime mod 65536)+#13#10);
+       WordToHex(word(ReleaseTime SHR 16))+WordToHex(word(ReleaseTime mod 65536))+#13#10);
       If (Replaces <> '') then Write(f, 'Replaces ' + Replaces+#13#10);
       If (Size > 0) then Write(f, 'Size '+IntToStr(Size)+#13#10);
-      If (Date > 0) then Write(f, 'Date '+WordToHex(Date SHR 16)+
-       WordToHex(Date mod 65536)+#13#10);
+      If (Date > 0) then Write(f, 'Date '+WordToHex(word(Date SHR 16))+
+       WordToHex(word(Date mod 65536))+#13#10);
       If (NumApp > 0) then For i := 1 to NumApp do Write(f, App[i]+#13#10);
       If (IOResult <> 0) then
         Begin
@@ -1909,7 +1915,7 @@ Var
     End;
   If (HReplace <> '') then WriteLn(f, 'Replaces '+HReplace);
   If (FSize <> 0) then WriteLn(f, 'Size '+IntToStr(FSize));
-  WriteLn(f, 'CRC '+ WordToHex(CRC SHR 16) + WordToHex(CRC mod 65536));
+  WriteLn(f, 'CRC '+ WordToHex(word(CRC SHR 16)) + WordToHex(word(CRC mod 65536)));
   If (HPW <> '') then WriteLn(f, 'PW ' + HPW);
   WriteLn(f, 'Created by ProTick'+Version);
   {$I-} Close(f); {$I+}
@@ -1978,10 +1984,10 @@ Var
           Begin
           SetPrevOpt;
           InsertSecEntry('LastHatch',
-            WordToHex(DTToUnixDate(DT) SHR 16)+ WordToHex(DTToUnixDate(DT)), '')
+            WordToHex(word(DTToUnixDate(DT) SHR 16))+ WordToHex(word(DTToUnixDate(DT))), '')
           End
         Else WriteSecEntry('LastHatch',
-            WordToHex(DTToUnixDate(DT) SHR 16)+ WordToHex(DTToUnixDate(DT)), '')
+            WordToHex(word(DTToUnixDate(DT) SHR 16))+ WordToHex(word(DTToUnixDate(DT))), '')
         End;
       End;
     FName := CurArea^.Path + DirSep + '*.*';
@@ -2041,7 +2047,7 @@ Var
   A1: TNetAddr;
   MKAddr: AddrType;
   bo: Boolean;
-  i: LongInt;
+  i,j: LongInt;
   s1: String;
 
   Begin
@@ -2119,7 +2125,12 @@ Var
         Begin
         s1 := UpStr(GetTo);
         bo := False;
-        For i := 1 to Cfg^.NumMgrNames do bo := bo or (Pos(UpStr(Cfg^.MgrNames[i]), s1) > 0);
+        For i := 1 to Cfg^.NumMgrNames do 
+         Begin
+         j := Pos(UpStr(Cfg^.MgrNames[i]), s1);
+         bo := bo or ((j > 0) and ((Length(s1) = (j+Length(Cfg^.MgrNames[i])-1))
+          or (s1[j+Length(Cfg^.MgrNames[i])] = ' ')));
+         End;
         If (bo and (not IsRcvd)) then
          Begin
          WriteLn;
@@ -2677,18 +2688,22 @@ Var
           End;
         End;
       WriteLn('Announcing to area "'+CurAnnGroup^.Area+'"');
-      AnnMsg^.SetMailType(mmtEchoMail);
+      Case CurAnnGroup^.Typ of
+       at_EchoMail: AnnMsg^.SetMailType(mmtEchoMail);
+       at_Netmail: AnnMsg^.SetMailType(mmtNetMail);
+       End;
       With AnnMsg^ do
         Begin
         StartNewMsg;
-        SetFrom(CurAnnGroup^.FromName);
-        TNetAddr2MKAddr(CurAnnGroup^.FromAddr, MKAddr);
-        SetOrig(MKAddr);
         SetTo(CurAnnGroup^.ToName);
         TNetAddr2MKAddr(CurAnnGroup^.ToAddr, MKAddr);
         SetDest(MKAddr);
+        SetFrom(CurAnnGroup^.FromName);
+        TNetAddr2MKAddr(CurAnnGroup^.FromAddr, MKAddr);
+        SetOrig(MKAddr);
         SetSubj(CurAnnGroup^.Subj);
         SetLocal(True);
+        If (CurAnnGroup^.Typ = at_Netmail) then SetPriv(True);
         Today(DT);
         If (DT.Year > 100) then DT.Year := DT.Year mod 100;
         Now(DT);
@@ -2704,7 +2719,7 @@ Var
         If (DT.Min > 9) then s := s + IntToStr(DT.Min)
         Else s := s + '0' + IntToStr(DT.Min);
         SetTime(s);
-        DoStringLn(#1'MSGID: '+Addr2Str(CurAnnGroup^.FromAddr)+' '+GetMsgID);
+        DoKludgeLn(#01'MSGID: '+Addr2Str(CurAnnGroup^.FromAddr)+' '+GetMsgID);
         DoStringLn('The following files were received at '+Cfg^.BBS+' today:');
         DoStringLn('');
         DoString('Area: '+CurAnnArea^.Area);
@@ -2796,7 +2811,8 @@ Var
 
         DoStringLn('');
         DoStringLn('--- ProTick'+Version);
-        DoStringLn(' * Origin: '+Cfg^.BBS+' ('+
+        If (CurAnnGroup^.Typ = at_EchoMail) then
+         DoStringLn(' * Origin: '+Cfg^.BBS+' ('+
          Addr2StrND(CurAnnGroup^.FromAddr)+')');
         Error := WriteMsg;
         If (Error <> 0) then
@@ -2888,15 +2904,15 @@ Var
      LogWriteLn(LogHandle, 'sending netmail announce to "'+
       CurConnUser^.User^.Name+'" ('+Addr2Str(CurConnUser^.User^.Addr)+')');
      StartNewMsg;
+     SetTo(CurConnUser^.User^.Name);
+     TNetAddr2MKAddr(CurConnUser^.User^.Addr, MKAddr);
+     SetDest(MKAddr);
      s := 'ProTick'+Version;
      SetFrom(s);
      If not CompAddr(CurConnUser^.User^.OwnAddr, EmptyAddr) then
       TNetAddr2MKAddr(CurConnUser^.User^.OwnAddr, MKAddr)
      Else TNetAddr2MKAddr(CurArea^.Addr, MKAddr);
      SetOrig(MKAddr);
-     SetTo(CurConnUser^.User^.Name);
-     TNetAddr2MKAddr(CurConnUser^.User^.Addr, MKAddr);
-     SetDest(MKAddr);
      SetSubj('new files arrived in Area '+CurAnnArea^.Area);
      SetLocal(True);
      SetPriv(True);
@@ -2917,8 +2933,8 @@ Var
      Else s := s + '0' + IntToStr(DT.Min);
      SetTime(s);
      If not CompAddr(CurConnUser^.User^.OwnAddr, EmptyAddr) then
-      DoStringLn(#1'MSGID: '+Addr2Str(CurConnUser^.User^.OwnAddr)+' '+GetMsgID)
-     Else DoStringLn(#1'MSGID: '+Addr2Str(CurArea^.Addr)+' '+GetMsgID);
+      DoKludgeLn(#01'MSGID: '+Addr2Str(CurConnUser^.User^.OwnAddr)+' '+GetMsgID)
+     Else DoKludgeLn(#01'MSGID: '+Addr2Str(CurArea^.Addr)+' '+GetMsgID);
      DoStringLn('The following files were sent to you today:');
      DoStringLn('');
      DoString('Area: '+CurAnnArea^.Area);
@@ -3045,6 +3061,5 @@ Else If Command = 'MAINT' Then Maint
 Else If Command = 'PACK' Then _Pack
 Else If Command = 'CHECK' Then {do nothing}
 Else Syntax;
-WriteLn('calling Done');
 Done;
 End.

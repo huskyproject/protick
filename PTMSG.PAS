@@ -9,7 +9,6 @@ Uses
   PTRegKey, TickType, TickCons, PTVar, PTProcs;
 
 Procedure ProcessMail;
-Procedure Announce;
 
 Procedure ConnectArea(Name: String; DReScan: Boolean; RSParams: String);
 Procedure ReScan(Name, Params: String);
@@ -607,28 +606,44 @@ Var
   Procedure SendList;
   Var
     CA: PArea;
+    CG: Byte;
+    CCG: Byte;
+    Found: Byte;
 
     Begin
     With NM2^ do
       Begin
       DoStringLn('List of areas available to you:');
-      CA := Cfg^.Areas;
-      If (CA^.Group in CurUser^.Groups) and
-        (CA^.Level <= CurUser^.Level) then
-         DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Repeat
-        CA := CA^.Next;
-        If (CA^.Group in CurUser^.Groups) and ((CA^.Flags and fa_Hidden) = 0) and
-          (CA^.Level <= CurUser^.Level) then
-           DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Until (CA^.Next = Nil);
       DoStringLn('');
+      For CG := 1 to 255 do If (CG in CurUser^.Groups) then
+       Begin
+       Found := 0;
+       For CCG := 1 to Cfg^.NumGroups do If (Cfg^.Groups[CCG].Index = CG) then
+        Begin Found := CCG; Break; End;
+       If (Found > 0) then DoStringLn('Group '+Cfg^.Groups[Found].Name)
+       Else DoStringLn('Group <unknown>');
+       CA := Cfg^.Areas;
+       If (CA^.Group = CG) and
+         (CA^.Level <= CurUser^.Level) then
+          DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+         Repeat
+         CA := CA^.Next;
+         If (CA^.Group = CG) and ((CA^.Flags and fa_Hidden) = 0) and
+           (CA^.Level <= CurUser^.Level) then
+            DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+         Until (CA^.Next = Nil);
+       DoStringLn('');
+       End;
       End;
     End;
 
   Procedure SendQuery;
   Var
     CA: PArea;
+    CG: Byte;
+    CCG: Byte;
+    Found: Byte;
+    WroteGroup: Boolean;
 
     Function CheckConn: Boolean;
     Var
@@ -658,19 +673,52 @@ Var
     With NM2^ do
       Begin
       DoStringLn('List of connected areas:');
-      CA := Cfg^.Areas;
-      If CheckConn then DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Repeat
-        CA := CA^.Next;
-        If CheckConn then DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Until (CA^.Next = Nil);
       DoStringLn('');
+      For CG := 1 to 255 do 
+       Begin
+       WroteGroup := False;
+       CA := Cfg^.Areas;
+       If ((CA^.Group = CG) and CheckConn) then
+        Begin
+        If not WroteGroup then
+         Begin
+         WroteGroup := True;
+         Found := 0;
+         For CCG := 1 to Cfg^.NumGroups do If (Cfg^.Groups[CCG].Index = CG) then
+          Begin Found := CCG; Break; End;
+         If (Found > 0) then DoStringLn('Group '+Cfg^.Groups[Found].Name)
+         Else DoStringLn('Group <unknown>');
+         End;
+        DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+        End;
+         Repeat
+         CA := CA^.Next;
+         If ((CA^.Group = CG) and CheckConn) then
+          Begin
+          If not WroteGroup then
+           Begin
+           WroteGroup := True;
+           Found := 0;
+           For CCG := 1 to Cfg^.NumGroups do If (Cfg^.Groups[CCG].Index = CG) then
+            Begin Found := CCG; Break; End;
+           If (Found > 0) then DoStringLn('Group '+Cfg^.Groups[Found].Name)
+           Else DoStringLn('Group <unknown>');
+           End;
+          DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+          End;
+         Until (CA^.Next = Nil);
+       If WroteGroup then DoStringLn('');
+       End;
       End;
     End;
 
   Procedure SendUnlinked;
   Var
     CA: PArea;
+    CG: Byte;
+    CCG: Byte;
+    Found: Byte;
+    WroteGroup: Boolean;
 
     Function CheckConn: Boolean;
     Var
@@ -700,17 +748,45 @@ Var
     With NM2^ do
       Begin
       DoStringLn('List of disconnected areas:');
-      CA := Cfg^.Areas;
-      If (CA^.Group in CurUser^.Groups) and
-        (CA^.Level <= CurUser^.Level) and (not CheckConn) then
-         DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Repeat
-        CA := CA^.Next;
-        If (CA^.Group in CurUser^.Groups) and (CA^.Level <= CurUser^.Level) and
-          ((CA^.Flags and fa_Hidden) = 0) and (not CheckConn) then
-           DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
-        Until (CA^.Next = Nil);
       DoStringLn('');
+      For CG := 1 to 255 do If (CG in CurUser^.Groups) then
+       Begin
+       CA := Cfg^.Areas;
+       WroteGroup := False;
+       If (CA^.Group = CG) and (CA^.Level <= CurUser^.Level) and
+         (not CheckConn) then
+         Begin
+         If not WroteGroup then
+          Begin
+          WroteGroup := True;
+          Found := 0;
+          For CCG := 1 to Cfg^.NumGroups do If (Cfg^.Groups[CCG].Index = CG) then
+           Begin Found := CCG; Break; End;
+          If (Found > 0) then DoStringLn('Group '+Cfg^.Groups[Found].Name)
+          Else DoStringLn('Group <unknown>');
+          End;
+         DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+         End;
+
+         Repeat
+         CA := CA^.Next;
+         If (CA^.Group = CG) and (CA^.Level <= CurUser^.Level) and
+           ((CA^.Flags and fa_Hidden) = 0) and (not CheckConn) then
+           Begin
+           If not WroteGroup then
+            Begin
+            WroteGroup := True;
+            Found := 0;
+            For CCG := 1 to Cfg^.NumGroups do If (Cfg^.Groups[CCG].Index = CG) then
+             Begin Found := CCG; Break; End;
+            If (Found > 0) then DoStringLn('Group '+Cfg^.Groups[Found].Name)
+            Else DoStringLn('Group <unknown>');
+            End;
+           DoStringLn(CA^.Name+Copy(Leer, 1, 30-Length(CA^.Name))+CA^.Desc);
+           End;
+         Until (CA^.Next = Nil);
+       If WroteGroup then DoStringLn('');
+       End;
       End;
     End;
 
@@ -870,7 +946,8 @@ Var
       SetTo(CurUser^.Name);
       TNetAddr2MKAddr(CurUser^.Addr, MKAddr);
       SetDest(MKAddr);
-      AKAMatch(CurUser^.Addr, A1);
+      If not CompAddr(CurUser^.OwnAddr, EmptyAddr) then A1 := CurUser^.OwnAddr
+      Else AKAMatch(CurUser^.Addr, A1);
       End
     Else
       Begin
@@ -901,7 +978,7 @@ Var
     Else s := s + '0' + IntToStr(DT.Min);
     SetTime(s);
     SetRefer(NM^.GetMsgNum);
-    DoStringLn(#01'MSGID: '+Addr2Str(A1)+' '+GetMsgID);
+    DoKludgeLn(#01'MSGID: '+Addr2Str(A1)+' '+GetMsgID);
 
     Case _Type of
       rs_List: SendList;
@@ -1011,6 +1088,7 @@ Var
   A1: TNetAddr;
   i: LongInt;
   ChTICs, ChFiles, ChPacker: Boolean;
+  Found: LongInt;
 
   Begin
   ChTICs := False;
@@ -1056,10 +1134,11 @@ Var
     End
   Else
     Begin
-    For i := 1 to Cfg^.NumPacker do If (s = Cfg^.Packer[i].Ext) then Break;
-    If (s = Cfg^.Packer[i].Ext) then
+    Found := 1;
+    For i := 1 to Cfg^.NumPacker do If (s = Cfg^.Packer[i].Ext) then Begin Found := i; Break; End;
+    If (s = Cfg^.Packer[Found].Ext) then
       Begin
-      CurUser^.Packer := Cfg^.Packer[i].Index;
+      CurUser^.Packer := Cfg^.Packer[Found].Index;
       ChPacker := True;
       End
     Else
@@ -1198,12 +1277,13 @@ Var
           Begin
           AddSecEntry('Packer', IntToStr(CurUser^.Packer), '')
           End;
-        For i := 1 to Cfg^.NumPacker do If (CurUser^.Packer = Cfg^.Packer[i].Index) then Break;
+        Found := 1;
+        For i := 1 to Cfg^.NumPacker do If (CurUser^.Packer = Cfg^.Packer[i].Index) then Begin Found := i; Break; End;
         LogSetCurLevel(LogHandle, 3);
         LogWriteLn(LogHandle, 'Set Packer for User '+CurUser^.Name+' ('+
           Addr2Str(CurUser^.Addr)+') to '+IntToStr(CurUser^.Packer)+' ('+
-          Cfg^.Packer[i].Ext+')');
-        SendRsp(rs_Packer, Cfg^.Packer[i].Ext);
+          Cfg^.Packer[Found].Ext+')');
+        SendRsp(rs_Packer, Cfg^.Packer[Found].Ext);
         End;
       End;
     End;
@@ -1222,12 +1302,7 @@ Var
     OutAddr := Cfg^.Addrs[i];
     Break;
     End;
-  If not Found then OutAddr := Cfg^.Addrs[i];
-  End;
-
-Procedure Announce;
-  Begin
-
+  If not Found then OutAddr := Cfg^.Addrs[1];
   End;
 
 

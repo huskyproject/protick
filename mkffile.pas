@@ -48,19 +48,20 @@ Type FFileObj = Object
 
 Implementation
 
-Uses MKFile,
-{$IFDEF WINDOWS}
-  WinDos;
-{$ELSE}
-  Dos,
-  {$IFDEF OPRO}
-  OpCrt;
-  {$ELSE}
-  Crt;
-  {$ENDIF}
-{$ENDIF}
-
-
+Uses MKFile
+{$IfDef WINDOWS}
+ , WinDOS
+{$Else}
+ , DOS
+ {$IfDef OPRO}
+ , OpCRT
+ {$Else}
+  {$IfNDef FPC}
+ , CRT
+  {$EndIf}
+ {$EndIf}
+{$EndIf}
+;
 
 Constructor FFileObj.Init(BSize: Word);
   Begin

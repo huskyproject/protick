@@ -257,7 +257,7 @@ Var
         End;
       If Debug then WriteLn;
       end;
-    If Cfg^.NumAreas = 0 then IniError('No Areas defined');
+    If Cfg^.NumAreas = 0 then IniError('No FileAreas defined');
     If Debug then
       Begin
       WriteLn('<Return>');
@@ -324,7 +324,11 @@ Procedure ParsePackers;
   Begin
   With Ini do
     Begin
-    If GetSecNum('PACKER') = 0 then IniError('No Packer defined');
+    If GetSecNum('PACKER') = 0 then
+     Begin
+     Cfg^.NumPacker := 0;
+     Exit;
+     End;
     SetSection('PACKER');
     I := 0;
       Repeat
@@ -339,7 +343,6 @@ Procedure ParsePackers;
         Cmd := s;
         End;
       Until not SetNextOpt;
-    If (i = 0) then IniError('No Packer defined');
     Cfg^.NumPacker := i;
     End;
   If Debug then
@@ -353,7 +356,11 @@ Procedure ParseUnPackers;
   Begin
   With Ini do
     Begin
-    If GetSecNum('UNPACKER') = 0 then IniError('No UnPacker defined');
+    If GetSecNum('UNPACKER') = 0 then
+     Begin
+     Cfg^.NumUnPacker := 0;
+     Exit;
+     End;
     SetSection('UNPACKER');
     I := 0;
       Repeat
@@ -368,7 +375,6 @@ Procedure ParseUnPackers;
         Cmd := s;
         End;
       Until not SetNextOpt;
-    If (i = 0) then IniError('No UnPacker defined');
     Cfg^.NumUnPacker := i;
     End;
   If Debug then
@@ -407,9 +413,14 @@ Procedure ParseGroups;
 
 Procedure ParseAnnGroups;
   Begin
+  Cfg^.AnnGroups := NIL;
   With Ini do
     Begin
-    If GetSecNum('ANNOUNCEGROUPS') = 0 then IniError('No AnnounceGroups defined');
+    If GetSecNum('ANNOUNCEGROUPS') = 0 then
+     Begin
+     Cfg^.NumAnnGroups := 0;
+     Exit;
+     End;
     SetSection('ANNOUNCEGROUPS');
     I := 0;
     While UpStr(ReSecEnName) = 'GROUP' do
@@ -435,6 +446,7 @@ Procedure ParseAnnGroups;
         Name := '';
         Area := '';
         Subj := '';
+        Typ := at_Echomail;
         FromName := '';
         ToName := '';
         With FromAddr do
@@ -482,6 +494,26 @@ Procedure ParseAnnGroups;
             Subj := RepEnv(ReSecEnValue);
             If Debug then WriteLn('Subj: ', Subj);
             End
+          Else If s = 'TYPE' then
+            Begin
+            s := UpStr(RepEnv(ReSecEnValue));
+            If (s = 'ECHOMAIL') then Typ := at_EchoMail
+            Else If (s = 'NETMAIL') then Typ := at_NetMail
+            Else
+             Begin
+             LogSetCurLevel(LogHandle, 1);
+             LogWriteLn(LogHandle, 'Invalid announcegroup-type: "'+s+'"!');
+             End;
+            If Debug then
+             Begin
+             Write('Type: ');
+             Case Typ of
+              at_Echomail: WriteLn('EchoMail');
+              at_Netmail: WriteLn('NetMail');
+              Else WriteLn('Invalid!');
+              End;
+             End;
+            End
           Else
             Begin
             LogWriteLn(LogHandle, 'Unknown or out of sequence keyword: "'+ ReSecEnName+ '='+ReSecEnValue+'"');
@@ -490,7 +522,6 @@ Procedure ParseAnnGroups;
           End;
         End;
       End;
-    If (i = 0) then IniError('No AnnounceGroups defined');
     Cfg^.NumAnnGroups := i;
     End;
   If Debug then
@@ -813,9 +844,14 @@ Var
 
 Procedure ParseUpLinks;
   Begin
+  Cfg^.UpLinks := NIL;
   With Ini do
     Begin
-    If GetSecNum('UPLINKS') = 0 then IniError('No UpLinks defined');
+    If GetSecNum('UPLINKS') = 0 then
+     Begin
+     Cfg^.NumUpLinks := 0;
+     Exit;
+     End;
     SetSection('UPLINKS');
     I := 0;
     While UpStr(ReSecEnName) = 'UPLINK' do
@@ -921,7 +957,6 @@ Procedure ParseUpLinks;
         End;
       If Debug then WriteLn;
       end;
-    If i = 0 then IniError('No UpLinks defined');
     Cfg^.NumUpLinks := i;
     If Debug then
       Begin
@@ -935,7 +970,11 @@ Procedure ParseArcNames;
   Begin
   With Ini do
     Begin
-    If GetSecNum('ARCNAMES') = 0 then IniError('No ArcNames defined');
+    If GetSecNum('ARCNAMES') = 0 then
+     Begin
+     Cfg^.NumArcNames := 0;
+     Exit;
+     End;
     SetSection('ARCNAMES');
     I := 0;
       Repeat
@@ -948,7 +987,6 @@ Procedure ParseArcNames;
         If Debug then WriteLn('ArcName: "', Cfg^.ArcNames[i].FileName, ',', Cfg^.ArcNames[i].UnPacker, '"');
         end;
       Until not SetNextOpt;
-    If i = 0 then IniError('No ArcNames defined');
     Cfg^.NumArcNames := i;
 
     If Debug then
@@ -1163,6 +1201,14 @@ Procedure ParseCfg;
      (s = 'J') or (s = 'JA'));
      End
     Else Cfg^.AddDLC := False;
+
+    If (ReadEntry('GENERAL', 'SINGLEDESCLINE') <> '') then
+     Begin
+     s := UpStr(ReadEntry('GENERAL', 'SINGLEDESCLINE'));
+     Cfg^.SingleDescLine := ((s = 'ON') or (s = 'Y') or (s = 'YES') or (s = '1') or
+     (s = 'J') or (s = 'JA'));
+     End
+    Else Cfg^.SingleDescLine := False;
 
     Val(RepEnv(ReadEntry('GENERAL', 'DLCOUNTDIGITS')), Cfg^.DLCDig, Error);
     If (Cfg^.AddDLC and (Cfg^.DLCDig = 0)) then

@@ -245,6 +245,13 @@ For i:= 1 to Byte(s1[0]) do s[i]:= UpCase(s1[i]);
 UpStr:= s;
 End;
 
+Function KillSpcs(s: String): String; {kill leading and trailing spaces}
+ Begin
+ While (s[1] in [' ', #9]) and (Length(s) > 0) do Delete(s, 1, 1);
+ While (s[Length(s)] in [' ', #9]) and (Length(s) > 0) do Delete(s, Length(s), 1);
+ KillSpcs := s;
+ End;
+
 
 {****************************** externe Routinen ****************************}
 function NewSec : pSecRec;
@@ -318,6 +325,7 @@ begin
   Begin
   ReadLn (f,Str);
   While (Str[Length(Str)] in [#13, #10]) do Dec(Str[0]);
+  KillSpcs(Str);
   if Length (Str) > 0 then
    begin
    if Str[1] = '[' then
@@ -325,7 +333,7 @@ begin
     ASec := NewSec;
     X := Pos (']',Str);
     if X > 1 then Dec (X,2) else Dec(x, 1);
-    ASec^.Name := UpStr(Copy (Str,2,X));
+    ASec^.Name := UpStr(KillSpcs(Copy (Str,2,X)));
     if IniTree = NIL then IniTree := ASec;
     if AktSec <> NIL then
      Begin
@@ -349,21 +357,21 @@ begin
       begin
       If (x = 0) then
        begin
-       AOpt^.Name := StrCut(Copy (Str, 1, y-1));
+       AOpt^.Name := KillSpcs(Copy (Str, 1, y-1));
        AOpt^.Value := '';
-       AOpt^.Comment := StrCut(Copy(Str, y+1, Length(str)-y));
+       AOpt^.Comment := KillSpcs(Copy(Str, y+1, Length(str)-y));
        end
       else
        begin
-       AOpt^.Name := StrCut(Copy (Str,1,X-1));
+       AOpt^.Name := KillSpcs(Copy (Str,1,X-1));
        if Y <> 0 then
         begin
-        AOpt^.Value := StrCut(CutStr(Copy (Str,X+1,Y-X-1)));
-        AOpt^.Comment := StrCut(CutStr(Copy (Str,Y+1,Length(Str)-Y)));
+        AOpt^.Value := KillSpcs(Copy (Str,X+1,Y-X-1));
+        AOpt^.Comment := KillSpcs(Copy (Str,Y+1,Length(Str)-Y));
         end
        else
         begin
-        AOpt^.Value := CutStr(Copy (Str,X+1,Length(Str)-X));
+        AOpt^.Value := KillSpcs(Copy (Str,X+1,Length(Str)-X));
         AOpt^.Comment := '';
         end;
        end;
@@ -371,7 +379,7 @@ begin
      end
     else
      begin
-     AOpt^.Name := StrCut(Str);
+     AOpt^.Name := KillSpcs(Str);
      AOpt^.Value := '';
      AOpt^.Comment := '';
      end;

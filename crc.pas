@@ -18,6 +18,8 @@ IMPLEMENTATION
 
 {$IfNDef FPC}
 Uses Crt;
+{$Else}
+Uses GeneralP;
 {$EndIf}
 
 CONST crc_32_tab: ARRAY[0..255] OF LONGINT = (
@@ -123,11 +125,7 @@ Function GetCRC(Const Name: string): LongInt;
       While (Cnt < 10) and (IO = 162) do
       begin
         inc(Cnt);
-{$IfDef FPC}
-        For i := 1 to 65535 do Write;
-{$Else}
         delay(1000);
-{$EndIf}
         {$I-} Reset(f,1); {$I+}
         IO := IOresult;
       end;

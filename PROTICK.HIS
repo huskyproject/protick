@@ -295,5 +295,28 @@ Version 0.8beta12
 * message areas and netmail area are now closed correctly after writing
   (netmail-)announces
 * rewrote files.bbs-code
+* TICs are no longer killed if no autocreate defaults exist
+* files.lng did not contain shortname under Linux
+* added many typecasts to circumvent YACB causing sporadic core dumps under
+  Linux
+* had to rewrite some for-loops because of a bug/feature in fpc
+* not using unit CRT under Linux anymore, sporadic segfaults while directly
+  writing to console (without redirection) should be gone now
+- only using bogus delay-routine to wait for locked files
 + added allfix2protick-converter to linux-version
+
+Version 0.8beta13
+* INTL-Kludge now correctly written in FileFix mails
+* SegFault in Linux version if no To-address was specified in TIC
+* removing FileName and DLC from files hatched by NewFilesHatch
+* SegFault on empty (L)Desc-Lines
+- if no matching address with zone matching the recipient of a FileFix
+  response is found, the first address is used now (former: last address)
+- filefix-names now match whole words (former: substrings) 
++ added support for netmail-announcegroups (keyword "Type")
++ using OwnAddr also for FileFix
++ SingleDescLine
++ Group in %LIST
++ commandline: "NewFilesHatch" now also available as "NFH"
++ added PTFLG (small FileListGenerator using protick.cfg) to linux-version
 

@@ -34,6 +34,7 @@ Const
   D0 =    1461;
   D1 =  146097;
   D2 = 1721119;
+  Digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   WkDaysEng  : Array[0..6] of String[9] = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
   WkDaysGer  : Array[0..6] of String[10] = ('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
   WkDays3Eng : Array[0..6] of String[3] = ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
@@ -101,6 +102,10 @@ function StrPCopy(Dest: CString; Src: String): CString;
 Function Exec(prog, params: String255): Integer;
 {$EndIf GPC}
 
+{$IfDef FPC}
+Procedure Delay(secs: Word);
+{$EndIf}
+
 {$IfNDef SPEED}
 Procedure GetFTime2(var f; var Year, Month, Day, Hour, Min, Sec: Word);
 {$EndIf}
@@ -121,6 +126,7 @@ Function LowerOf(a, b : LongInt) : LongInt;
 Function TimeDiff(Time1, Time2 : TimeTyp): LongInt; {in Sekunden}
 Function KillLeadingSpcs(s: String255): String255;
 Function KillTrailingSpcs(s: String255): String255;
+Function KillSpcs(s: String): String;
 Function AddDirSep(s: String255): String255;
 Function GregorianToJulian(DT: TimeTyp): ULong;
 Procedure JulianToGregorian(JulianDN : ULong; Var Year, Month, Day : Word);
@@ -301,6 +307,18 @@ Function _ltoa (value: LongInt; s: cstring; radix: integer): CString; C;
 Function _ultoa (value: ULong; s: cstring; radix: integer): CString; C;
 
 {$EndIf GPC}
+
+
+{$IfDef FPC}
+Procedure Delay(secs: Word);
+Var
+ i: Word;
+
+ Begin
+ {bogus delay}
+ For i := 1 to 10000 do Write;
+ End;
+{$EndIf}
 
 
 Function LowCase(Ch:Char):Char;
@@ -534,6 +552,13 @@ Function KillTrailingSpcs(s: String255):String255;
   KillTrailingSpcs := s;
   End;
 
+Function KillSpcs(s: String): String; {kill leading and trailing spaces}
+ Begin
+ While (s[1] in [' ', #9]) and (Length(s) > 0) do Delete(s, 1, 1);
+ While (s[Length(s)] in [' ', #9]) and (Length(s) > 0) do Delete(s, Length(s), 1);
+ KillSpcs := s;
+ End;
+
 Function AddDirSep(s: String255): String255;
  Begin
  If (s[Byte(s[0])] <> DirSep) then AddDirSep := s + DirSep
@@ -654,7 +679,7 @@ Var
 
   Begin
   i := DTToUnixDate(DT);
-  s := WordToHex(i SHR 16) + WordToHex(i);
+  s := WordToHex(word(i SHR 16)) + WordToHex(word(i));
   DTToUnixHexStr := s;
   End;
 

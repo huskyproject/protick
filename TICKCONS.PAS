@@ -103,6 +103,10 @@ Const
   rs_Query          = 26;
   rs_Unlinked       = 27;
 
+  {Announcegroup.Type}
+  at_Echomail       = 0;
+  at_Netmail        = 1;
+
   EmptyAddr         : TNetAddr = (Zone:0; Net:0; Node:0; Point:0; Domain:'');
 
 Implementation

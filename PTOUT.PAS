@@ -4,8 +4,10 @@ Interface
 Uses
 {$IfDef Linux}
  Linux,
+{$Else}
+ CRT,
 {$EndIf}
- CRT, DOS,
+ DOS,
  Types, GeneralP,
  Log,
  TickCons, TickType;
@@ -451,7 +453,11 @@ Var
  If CompAddr(Usr^.ArcAddr, EmptyAddr) then Addr := Usr^.Addr Else Addr := Usr^.ArcAddr;
  If ((Addr.Domain = PrimAKA.Domain) or (Addr.Domain = '') or (PrimAKA.Domain = '')) then
    Begin
-   If (Addr.Zone <> PrimAKA.Zone) then FlowName := Cfg^.OutBound + '.'+Copy(WordToHex(Addr.Zone), 2, 3)+DirSep
+   If (Addr.Zone <> PrimAKA.Zone) then 
+    Begin
+    If (Addr.Zone < 4096) then FlowName := Cfg^.OutBound+'.'+Copy(WordToHex(word(Addr.Zone)), 2, 3)+DirSep
+    Else FlowName := Cfg^.OutBound+'.'+WordToHex(Word(Addr.Zone))+DirSep; 
+    End
    Else FlowName := Cfg^.OutBound + DirSep;
    End
  Else
@@ -465,14 +471,14 @@ Var
      If (UpStr(Addr.Domain) = UpStr(Cfg^.Domains[i].Domain)) then
       s1 := Cfg^.Domains[i].Abbrev;
     End;
-   FlowName := s + s1 + '.'+Copy(WordToHex(Addr.Zone), 2, 3)+DirSep;
+   FlowName := s + s1 + '.'+Copy(WordToHex(word(Addr.Zone)), 2, 3)+DirSep;
    End;
  Dir := Copy(FlowName, 1, Length(FlowName) - 1);
- FlowName := FlowName + WordToHex(Addr.Net) + WordToHex(Addr.Node);
+ FlowName := FlowName + WordToHex(word(Addr.Net)) + WordToHex(word(Addr.Node));
  If (Addr.Point <> 0) then
    Begin
    Dir := FlowName + '.pnt';
-   FlowName := FlowName + '.pnt'+DirSep+'0000' + WordToHex(Addr.Point);
+   FlowName := FlowName + '.pnt'+DirSep+'0000' + WordToHex(word(Addr.Point));
    End;
  Case Usr^.MailFlags of
    ml_Normal : FlowName := FlowName + '.flo';
@@ -761,13 +767,15 @@ Var
  }
 
  {calculate first name, create necessary dirs}
- CurName := TicDir+DirSep+'zone.'+Copy(WordToHex(User^.ArcAddr.Zone), 2, 3) +
-  DirSep + WordToHex(User^.ArcAddr.Net) +
-  WordToHex(User^.ArcAddr.Node);
- MakeDir(TicDir+DirSep+'zone.'+Copy(WordToHex(User^.ArcAddr.Zone), 2, 3));
+ CurName := TicDir+DirSep+'zone.';
+ If (User^.ArcAddr.Zone < 4096) then CurName := CurName+Copy(WordToHex(Word(User^.ArcAddr.Zone)), 2, 3)
+ Else CurName := CurName+WordToHex(Word(User^.ArcAddr.Zone));
+ MakeDir(CurName);
+ CurName := CurName+DirSep + WordToHex(word(User^.ArcAddr.Net)) +
+  WordToHex(word(User^.ArcAddr.Node));
  If (User^.ArcAddr.Point <> 0) then
   Begin
-  CurName := CurName + '.pnt' + DirSep + '0000' + WordToHex(User^.ArcAddr.Point);
+  CurName := CurName + '.pnt' + DirSep + '0000' + WordToHex(word(User^.ArcAddr.Point));
   MakeDir(CurName+'.pnt');
   End;
  CurName := CurName + '.c00';
@@ -927,7 +935,7 @@ Var
   BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
   BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
   Flags := (Long1 + (Long2 * 256)) + ((Long3 + (Long4 * 256)) * 65536);
-{  WriteLn('Flags = ', WordToHex(Flags SHR 16)+WordToHex(Flags mod 65536));}
+{  WriteLn('Flags = ', WordToHex(word(Flags SHR 16))+WordToHex(word(Flags mod 65536)));}
 
   BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
   BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);

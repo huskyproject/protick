@@ -341,11 +341,7 @@ Function shLock(Var F; LockStart,LockLength: LongInt): Word;
     Code := LockFile(F,LockStart,LockLength);
     Dec(Count);
     If Code = $21 Then
-{$IfDef FPC}
-      For i := 1 to 65535 do Write;
-{$Else}
       Delay(TryDelay);
-{$EndIf}
     End;
   If Code = 1 Then
     Code := 0;

@@ -185,7 +185,7 @@ Type
        Name: String[40];
        End;
 
-     TAnnGroup = {284b}
+     TAnnGroup = {285b}
        Record
        Next: PAnnGroup;
        Prev: PAnnGroup;
@@ -197,6 +197,7 @@ Type
        ToName: String[30];
        FromAddr: TNetAddr;
        ToAddr: TNetAddr;
+       Typ: Byte;
        End;
 
      TArcName = {22b}
@@ -231,7 +232,7 @@ Type
        UnPacker: Array[1..50] of TUnPacker;            {  4250b}
        NumPacker: Byte;                                {     1b}
        NumUnPacker: Byte;                              {     1b}
-       Groups: Array[1..50] of TGroup;                 {  2100b}
+       Groups: Array[1..255] of TGroup;                { 10710b}
        NumGroups: Byte;                                {     1b}
        AnnGroups: PAnnGroup;                           {     4b}
        NumAnnGroups: Byte;                             {     1b}
@@ -245,6 +246,7 @@ Type
        LDescChar: Char;                                {     1b}
        AddDLC: Boolean;                                {     1b}
        DLCDig: Byte;                                   {     1b}
+       SingleDescLine: Boolean;                        {     1b}
        CheckDest: Boolean;                             {     1b}
        DelReq: Boolean;                                {     1b}
        DelRsp: Boolean;                                {     1b}
@@ -263,7 +265,7 @@ Type
        PTLst: DirStr;                                  {   151b}
        CreateDirs: Boolean;                            {     1b}
        end;                                            {-------}
-                                                       { 15770b}
+                                                       { 15381b}
 
      TUpLink =
        Record
