@@ -1,6 +1,6 @@
 Program GenKey;
 Uses
-  UNIX,
+  Linux,
   Types, GeneralP, CRC,
   TickType,
   PTRegKey;
