@@ -1,13 +1,15 @@
 #!/usr/bin/make -f
 
-# include Husky-Makefile-Config
-include ../huskymak.cfg
+DEBUG=1
+INCDIR=/usr/local/include
+BINDIR=/usr/local/bin
+IBOPT=
+
 
 ifeq ($(DEBUG), 1)
-  PASOPT = -dUNIX -Fu$(INCDIR) -dDEBUG
-#  PASOPT = -dFIDOCONF -dUNIX -Fu$(INCDIR) -dDEBUG -k'-L$(LIBDIR)'
+  POPT = -dUNIX -Fu$(INCDIR) -dDEBUG
 else
-  PASOPT = -dUNIX -Fu$(INCDIR) -dRELEASE
+  POPT = -dUNIX -Fu$(INCDIR) -dRELEASE
 endif
 
 all: protick
@@ -17,9 +19,8 @@ PASFILES= protick.pas mkglobt.pas mkmisc.pas mkmsgabs.pas mkmsgfid.pas \
  crc.pas log.pas inifile.pas ptregkey.pas tickcons.pas ticktype.pas \
  ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas
 
-#protick: $(PASFILES) ptfconf.pas $(INCDIR)/fidoconf.pas
 protick: $(PASFILES)
-	ppc386 $(PASOPT) protick.pas
+	ppc386 $(POPT) protick.pas
 
 clean:
 	-rm *.o *.ppu *.a *~
