@@ -20,17 +20,17 @@ protick$(EXE): $(PASFILES)
 	$(PC) $(POPT) protick.pas
 
 clean:
-	-$(RM) *$(OBJ)
-	-$(RM) *$(TPU)
-	-$(RM) *$(LIB)
-	-$(RM) *~
+	-$(RM) $(RMOPT) *$(OBJ)
+	-$(RM) $(RMOPT) *$(TPU)
+	-$(RM) $(RMOPT) *$(LIB)
+	-$(RM) $(RMOPT) *~
 
 distclean: clean
-	-$(RM) protick$(EXE) genkey$(EXE)
+	-$(RM) $(RMOPT) protick$(EXE) genkey$(EXE)
 
 install: protick$(EXE)
 	$(INSTALL) $(IBOPT) protick$(EXE) $(BINDIR)
 
 uninstall:
-	-$(RM) $(BINDIR)$(DIRSEP)protick$(EXE)
+	-$(RM) $(RMOPT) $(BINDIR)$(DIRSEP)protick$(EXE)
 
