@@ -46,7 +46,6 @@ Procedure _Pack; Forward;
 
 Procedure CheckBsy; Forward;
 Procedure Init; Forward;
-Procedure Done; Forward;
 Procedure DispAnnList; Forward;
 Procedure Syntax; Forward;
 Procedure SendTic(Usr: PUser; Tic: PTick; FName: String); Forward;
@@ -57,207 +56,7 @@ Procedure AddAnnFile(ar: String; fn: String; desc: PChar2; From: TNetAddr); Forw
 Procedure DoAnnounce; Forward;
 Procedure DoNMAnn; Forward;
 
-Procedure CheckBsy;
-Var
-  f: File;
-  s: String;
-
-  Begin
-  s := Cfg^.FlagDir; {FPC doesn't like "Cfg^.FlagDir+DirSep+'ProTick.BSY'" :( }
-  Assign(f, s + DirSep+'protick.bsy');
-  {$I-} ReSet(f); {$I+}
-  If (IOResult = 0) then
-   Begin
-   WriteLn('protick.bsy found - aborting');
-   LogSetCurLevel(LogHandle, 1);
-   LogWriteLn(LogHandle, 'protick.bsy found - aborting');
-   Close(f);
-   Done;
-   Halt(Err_Bsy);
-   End
-  Else
-   Begin
-   {$I-} ReWrite(f); {$I+}
-   If (IOResult <> 0) then
-    Begin
-    LogSetCurLevel(LogHandle, 1);
-    LogWriteLn(LogHandle, 'Couldn''t create '+Cfg^.FlagDir+DirSep+
-     'protick.bsy!');
-    Done;
-    Halt(Err_Bsy);
-    End;
-   Close(f);
-   End;
-  CreatedBsy := True;
-  End;
-
-
-Procedure Syntax;
-  Begin
-  WriteLn('Syntax: ProTick <Command> [options]');
-  WriteLn;
-  WriteLn('Valid commands:');
-  WriteLn('TOSS                          - Process TICs');
-  WriteLn('SCAN                          - Scan for Mails');
-  WriteLn('HATCH                         - Hatch file');
-  WriteLn('NEWFILESHATCH / NFH           - Hatch new files');
-  WriteLn('MAINT                         - daily maintenance');
-  WriteLn('PACK                          - create archives');
-  WriteLn('CHECK                         - check config');
-  WriteLn;
-  WriteLn('Valid options:');
-  WriteLn('-D[ebug]                      - debug mode');
-  WriteLn('-C<Config>                    - use <Config> as config');
-  WriteLn('-nodupe                       - do not perform dupechecking');
-  WriteLn('File=<File>                   - [H] file');
-  WriteLn('Area=<Area>                   - [H] area');
-  WriteLn('From=<Addr>                   - [H] from-address');
-  WriteLn('To=<Addr>                     - [H] to-address');
-  WriteLn('Origin=<Addr>                 - [H] origin-address');
-  WriteLn('Desc=<Desc>                   - [H] description');
-  WriteLn('Replace=<FileMask>            - [H] files to replace');
-  WriteLn('Move=<Yes|No|0|1|True|False>  - [H] delete files after hatching');
-  WriteLn('PW=<PassWord>                 - [H] password');
-  WriteLn('H = Hatch');
-  WriteLn;
-  End;
-
-
-Procedure Init;
-Var
-  i: ULong;
-  Error: Integer;
-  s, s1: String;
-  f: Text;
-
-  Begin
-  WriteLn('MemAvail: ', MemAvail);
-  Version := _Version;
-  CurAnnArea := NIL;
-  CurAnnFile := NIL;
-  AnnAreas := NIL;
-  AnnFiles := NIL;
-  MainDone := Done;
-  HArea := '';
-  HFile := '';
-  HFrom := EmptyAddr;
-  HTo := EmptyAddr;
-  HOrigin := EmptyAddr;
-  HReplace := '';
-  HMove := False;
-  HPW := '';
-  AutoAddList := NIL;
-  TossList := NIL;
-  CurAutoAddList := NIL;
-  CurTossList := NIL;
-  CreatedBsy := False;
-  Randomize;
-{$IfDef SPEED}
-  ExecViaSession := False;
-  AsynchExec := False;
-{$EndIf}
-  GetMem(HDesc, 65535);
-  HDesc^[0] := #0;
-  If (RegInfo.Ver <> 0) then
-    Begin
-    Version := _Version + '+ #' + IntToStr(RegInfo.Serial);
-    WriteLn('ProTick'+Version);
-    With RegInfo do WriteLn('Registered to '+Name+' ('+Addr2Str(Addr)+')');
-    Case RegInfo.Ver of
-      1: Write('noncommercial version, ');
-      2: Write('commercial version, ');
-      3: Write('author version, ');
-      End;
-    If (RegInfo.Copies = 0) then WriteLn('unlimited copies')
-    Else WriteLn(RegInfo.Copies, ' copies');
-    End
-  Else
-    Begin
-    Version := _Version + ' unreg';
-    WriteLn('ProTick'+Version);
-    End;
-  Debug := False;
-  DupeCheck := True;
-  Command := '';
-  s := GetEnv('PT');
-{$IfDef Linux}
-  s := FSearch('protick.cfg', '.;'+s+';/etc/fido');
-{$Else}
-  s := FSearch('protick.cfg', '.;'+s+';c:\fido');
-{$EndIf}
-  CfgName := s;
-  If (ParamCount < 1) then
-    Begin
-    Syntax;
-    Halt(Err_NoParams);
-    End;
-  For i := 1 to ParamCount do
-    Begin
-    s := RepEnv(UpStr(ParamStr(i)));
-    If (Pos('-D', s) = 1) then Debug := True
-    Else If (Pos('-C', s) = 1) then CfgName := RepEnv(Copy(ParamStr(i), 3, Length(s) - 2))
-    Else If (s = '-NODUPE') then DupeCheck := False
-    Else If (s = 'SCAN') then Command := s
-    Else If (s = 'TOSS') then Command := s
-    Else If (s = 'HATCH') then Command := s
-    Else If (s = 'NEWFILESHATCH') then Command := s
-    Else If (s = 'NFH') then Command := 'NEWFILESHATCH'
-    Else If (s = 'MAINT') then Command := s
-    Else If (s = 'PACK') then Command := s
-    Else If (s = 'CHECK') then Command := s
-    Else If (Pos('AREA', s) = 1) then HArea := RepEnv(Copy(ParamStr(i), 6, Length(s) - 5))
-    Else If (Pos('FILE', s) = 1) then HFile := RepEnv(Copy(ParamStr(i), 6, Length(s) - 5))
-    Else If (Pos('DESC', s) = 1) then StrPCopy(Pointer(HDesc),
-      Translate(RepEnv(Copy(ParamStr(i), 6, Length(s) - 5)), '_', ' '))
-    Else If (Pos('PASSWORD', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 10, Length(s) - 9))
-    Else If (Pos('PWD', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 5, Length(s) - 4))
-    Else If (Pos('PW', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 4, Length(s) - 3))
-    Else If (Pos('REPLACE', s) = 1) then HReplace := RepEnv(Copy(ParamStr(i), 9, Length(s) - 8))
-    Else If (Pos('FROM', s) = 1) then Str2Addr(RepEnv(Copy(ParamStr(i), 6, Length(s) - 5)), HFrom)
-    Else If (Pos('TO', s) = 1) then Str2Addr(RepEnv(Copy(ParamStr(i), 4, Length(s) - 3)), HTo)
-    Else If (Pos('ORIGIN', s) = 1) then Str2Addr(RepEnv(Copy(ParamStr(i), 8, Length(s) - 7)), HOrigin)
-    Else If (Pos('MOVE', s) = 1) then
-      Begin
-      s := UpStr(RepEnv(Copy(s, 6, Length(s) - 5)));
-      HMove := (s = 'TRUE') or (s = 'ON') or (s = '1') or (s[1] = 'Y') or (s[1] = 'J');
-      End
-    Else
-      Begin
-      WriteLn('Unknown command "'+s+'"');
-      Syntax;
-      Halt(Err_UnknownCommand);
-      End;
-    End;
-  If (CfgName = '') then
-   Begin
-   WriteLn('Could not locate config!');
-   Halt(Err_NoCfg);
-   End
-  Else If not FileExist(CfgName) then
-   Begin
-   WriteLn('Couldn''t open "'+CfgName+'"!');
-   Halt(Err_NoCfg);
-   End;
-  WriteLn;
-  ParseCfg;
-  Case Cfg^.OBType of
-   OB_BT: Outbound := New(pBTOutbound, Init(Cfg, LogHandle, Cfg^.Outbound, Cfg^.Addrs[1]));
-   OB_FD: Outbound := New(pFDOutbound, Init(Copy(Cfg^.Outbound, 1,
-    Pos(',', Cfg^.Outbound)-1), Copy(Cfg^.Outbound, Pos(',', Cfg^.Outbound)+1,
-    Length(Cfg^.Outbound)), LogHandle, Cfg^.TicOut, Cfg^.FlagDir));
-   {OB_TMail: Outbound := New(pTMailOutbound, Init); }
-   Else
-    Begin
-    LogSetCurLevel(LogHandle, 1);
-    LogWriteLn(LogHandle, 'Invalid outbound type!');
-    Done;
-    Halt(Err_Internal);
-    End;
-   End;
-  CheckBsy;
-  End;
-
-Procedure Done;
+Procedure Done; Far;
 Var
   f: Text;
 
@@ -394,6 +193,201 @@ Var
   Dispose(Outbound, Done);
   Cfg := Nil;
   WriteLn('MemAvail: ', MemAvail);
+  End;
+
+Procedure CheckBsy;
+Var
+  f: File;
+  s: String;
+
+  Begin
+  s := Cfg^.FlagDir; {FPC doesn't like "Cfg^.FlagDir+DirSep+'ProTick.BSY'" :( }
+  Assign(f, s + DirSep+'protick.bsy');
+  {$I-} ReSet(f); {$I+}
+  If (IOResult = 0) then
+   Begin
+   WriteLn('protick.bsy found - aborting');
+   LogSetCurLevel(LogHandle, 1);
+   LogWriteLn(LogHandle, 'protick.bsy found - aborting');
+   Close(f);
+   Done;
+   Halt(Err_Bsy);
+   End
+  Else
+   Begin
+   {$I-} ReWrite(f); {$I+}
+   If (IOResult <> 0) then
+    Begin
+    LogSetCurLevel(LogHandle, 1);
+    LogWriteLn(LogHandle, 'Couldn''t create '+Cfg^.FlagDir+DirSep+
+     'protick.bsy!');
+    Done;
+    Halt(Err_Bsy);
+    End;
+   Close(f);
+   End;
+  CreatedBsy := True;
+  End;
+
+
+Procedure Syntax;
+  Begin
+  WriteLn('Syntax: ProTick <Command> [options]');
+  WriteLn;
+  WriteLn('Valid commands:');
+  WriteLn('TOSS                          - Process TICs');
+  WriteLn('SCAN                          - Scan for Mails');
+  WriteLn('HATCH                         - Hatch file');
+  WriteLn('NEWFILESHATCH / NFH           - Hatch new files');
+  WriteLn('MAINT                         - daily maintenance');
+  WriteLn('PACK                          - create archives');
+  WriteLn('CHECK                         - check config');
+  WriteLn;
+  WriteLn('Valid options:');
+  WriteLn('-D[ebug]                      - debug mode');
+  WriteLn('-C<Config>                    - use <Config> as config');
+  WriteLn('-nodupe                       - do not perform dupechecking');
+  WriteLn('File=<File>                   - [H] file');
+  WriteLn('Area=<Area>                   - [H] area');
+  WriteLn('Desc=<Desc>                   - [H] description');
+  WriteLn('Replace=<FileMask>            - [H] files to replace');
+  WriteLn('Move=<Yes|No|0|1|True|False>  - [H] delete files after hatching');
+  WriteLn('PW=<PassWord>                 - [H] password');
+  WriteLn('H = Hatch');
+  WriteLn;
+  End;
+
+
+Procedure Init;
+Var
+  i: ULong;
+  Error: Integer;
+  s, s1: String;
+  f: Text;
+
+  Begin
+  WriteLn('MemAvail: ', MemAvail);
+  Version := _Version;
+  CurAnnArea := NIL;
+  CurAnnFile := NIL;
+  AnnAreas := NIL;
+  AnnFiles := NIL;
+  MainDone := ProTick.Done;
+  HArea := '';
+  HFile := '';
+  HFrom := EmptyAddr;
+  HTo := EmptyAddr;
+  HOrigin := EmptyAddr;
+  HReplace := '';
+  HMove := False;
+  HPW := '';
+  AutoAddList := NIL;
+  TossList := NIL;
+  CurAutoAddList := NIL;
+  CurTossList := NIL;
+  CreatedBsy := False;
+  Randomize;
+{$IfDef SPEED}
+  ExecViaSession := False;
+  AsynchExec := False;
+{$EndIf}
+  GetMem(HDesc, 65535);
+  HDesc^[0] := #0;
+  If (RegInfo.Ver <> 0) then
+    Begin
+    Version := _Version + '+ #' + IntToStr(RegInfo.Serial);
+    WriteLn('ProTick'+Version);
+    With RegInfo do WriteLn('Registered to '+Name+' ('+Addr2Str(Addr)+')');
+    Case RegInfo.Ver of
+      1: Write('noncommercial version, ');
+      2: Write('commercial version, ');
+      3: Write('author version, ');
+      End;
+    If (RegInfo.Copies = 0) then WriteLn('unlimited copies')
+    Else WriteLn(RegInfo.Copies, ' copies');
+    End
+  Else
+    Begin
+    Version := _Version + ' unreg';
+    WriteLn('ProTick'+Version);
+    End;
+  Debug := False;
+  DupeCheck := True;
+  Command := '';
+  FSplit(ParamStr(0), s1, s, s);
+  s := GetEnv('PT');
+{$IfDef Linux}
+  s := FSearch('protick.cfg', '.;'+s+';/etc/fido');
+{$Else}
+  s := FSearch('protick.cfg', '.;'+s+';c:\fido;'+s1);
+{$EndIf}
+  CfgName := s;
+  If (ParamCount < 1) then
+    Begin
+    Syntax;
+    Halt(Err_NoParams);
+    End;
+  For i := 1 to ParamCount do
+    Begin
+    s := RepEnv(UpStr(ParamStr(i)));
+    If (Pos('-D', s) = 1) then Debug := True
+    Else If (Pos('-C', s) = 1) then CfgName := RepEnv(Copy(ParamStr(i), 3, Length(s) - 2))
+    Else If (s = '-NODUPE') then DupeCheck := False
+    Else If (s = 'SCAN') then Command := s
+    Else If (s = 'TOSS') then Command := s
+    Else If (s = 'HATCH') then Command := s
+    Else If (s = 'NEWFILESHATCH') then Command := s
+    Else If (s = 'NFH') then Command := 'NEWFILESHATCH'
+    Else If (s = 'MAINT') then Command := s
+    Else If (s = 'PACK') then Command := s
+    Else If (s = 'CHECK') then Command := s
+    Else If (Pos('AREA', s) = 1) then HArea := RepEnv(Copy(ParamStr(i), 6, Length(s) - 5))
+    Else If (Pos('FILE', s) = 1) then HFile := RepEnv(Copy(ParamStr(i), 6, Length(s) - 5))
+    Else If (Pos('DESC', s) = 1) then StrPCopy(Pointer(HDesc),
+      Translate(RepEnv(Copy(ParamStr(i), 6, Length(s) - 5)), '_', ' '))
+    Else If (Pos('PASSWORD', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 10, Length(s) - 9))
+    Else If (Pos('PWD', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 5, Length(s) - 4))
+    Else If (Pos('PW', s) = 1) then HPW := RepEnv(Copy(ParamStr(i), 4, Length(s) - 3))
+    Else If (Pos('REPLACE', s) = 1) then HReplace := RepEnv(Copy(ParamStr(i), 9, Length(s) - 8))
+    Else If (Pos('MOVE', s) = 1) then
+      Begin
+      s := UpStr(RepEnv(Copy(s, 6, Length(s) - 5)));
+      HMove := (s = 'TRUE') or (s = 'ON') or (s = '1') or (s[1] = 'Y') or (s[1] = 'J');
+      End
+    Else
+      Begin
+      WriteLn('Unknown command "'+s+'"');
+      Syntax;
+      Halt(Err_UnknownCommand);
+      End;
+    End;
+  If (CfgName = '') then
+   Begin
+   WriteLn('Could not locate config!');
+   Halt(Err_NoCfg);
+   End
+  Else If not FileExist(CfgName) then
+   Begin
+   WriteLn('Couldn''t open "'+CfgName+'"!');
+   Halt(Err_NoCfg);
+   End;
+  WriteLn;
+  ParseCfg;
+  Case Cfg^.OBType of
+   OB_BT: Outbound := New(pBTOutbound, Init(Cfg, LogHandle, Cfg^.Outbound, Cfg^.Addrs[1]));
+   OB_FD: Outbound := New(pFDOutbound, Init(Copy(Cfg^.Outbound, 1,
+    Pos(',', Cfg^.Outbound)-1), Copy(Cfg^.Outbound, Pos(',', Cfg^.Outbound)+1,
+    Length(Cfg^.Outbound)), LogHandle, Cfg^.TicOut, Cfg^.FlagDir));
+   {OB_TMail: Outbound := New(pTMailOutbound, Init); }
+   Else
+    Begin
+    LogSetCurLevel(LogHandle, 1);
+    LogWriteLn(LogHandle, 'Invalid outbound type!');
+    Done;
+    Halt(Err_Internal);
+    End;
+   End;
+  CheckBsy;
   End;
 
 Procedure Toss;
@@ -1731,7 +1725,6 @@ Var
   crlf: PChar2;
   PPos: PChar2;
   pc : PChar2;
-  local1, local2: Boolean;
 
   Begin
   PPos := HDesc;
@@ -1746,15 +1739,6 @@ Var
     ReadLn(HFile);
     Write('Area: ');
     ReadLn(HArea);
-    Write('From: ');
-    ReadLn(s);
-    If (s = '') then HFrom := EmptyAddr Else Str2Addr(s, HFrom);
-    Write('To: ');
-    ReadLn(s);
-    If (s = '') then HTo := EmptyAddr Else Str2Addr(s, HTo);
-    Write('Origin: ');
-    ReadLn(s);
-    If (s = '') then HOrigin := EmptyAddr Else Str2Addr(s, HOrigin);
     Write('Replaces: ');
     ReadLn(HReplace);
     Write('Desc: ');
@@ -1764,25 +1748,25 @@ Var
     ReadLn(s);
     s := UpStr(s);
     HMove := (s = 'TRUE') or (s = 'ON') or (s = '1') or (s[1] = 'Y') or (s[1] = 'J');
-    local1 := false;
-    local2 := false;
-    For i := 1 to Cfg^.NumAddrs do local1 := local1 or CompAddr(Cfg^.Addrs[i], HFrom);
-    For i := 1 to Cfg^.NumAddrs do local2 := local2 or CompAddr(Cfg^.Addrs[i], HTo);
-    If (local1 and local2) then HPW := Cfg^.LocalPwd
-    Else
-      Begin
-      Write('Password: ');
-      ReadLn(HPW);
-      End;
     End;
   If (HArea = '') then
     Begin
     WriteLn('No Area specified');
     Exit;
     End;
-  For i := 1 to Cfg^.NumAddrs do local1 := local1 or CompAddr(Cfg^.Addrs[i], HFrom);
-  For i := 1 to Cfg^.NumAddrs do local2 := local2 or CompAddr(Cfg^.Addrs[i], HTo);
-  If (local1 and local2) then HPW := Cfg^.LocalPwd;
+  HArea := UpStr(HArea);
+  CurArea := Cfg^.Areas;
+  While ((CurArea <> NIL) and (UpStr(CurArea^.Name) <> HArea)) do CurArea := CurArea^.Next;
+  If (CurArea = NIL) then
+   Begin
+   LogSetCurLevel(LogHandle, 1);
+   LogWriteLn(LogHandle, 'Area "'+HArea+'" for hatching not found in config!');
+   Exit;
+   End;
+  CopyAddr(HFrom, CurArea^.Addr);
+  CopyAddr(HTo, CurArea^.Addr);
+  CopyAddr(HOrigin, CurArea^.Addr);
+  HPW := Cfg^.LocalPwd;
   FSplit(HFile, Dir, Name, Ext);
   If (Dir <> Cfg^.InBound) then
     Begin
@@ -2185,9 +2169,13 @@ Procedure Maint;
   Begin
   WriteLn('Maint');
   WriteLn;
+  WriteLn('Calling PurgeArchs');
   Outbound^.PurgeArchs;
+  WriteLn('Calling DelPT');
   DelPT;
+  WriteLn('Calling PurgeDupes');
   PurgeDupes;
+  WriteLn('Done');
   End;
 
 Procedure _Pack;

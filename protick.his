@@ -328,7 +328,13 @@ Version 0.8beta14
 + HeaderFile and FooterFile in Announce-Groups
 
 Version 0.9beta1
+* the config now also is looked for in the directory of the EXE again
 - changed LDescChar to LDescString
 - updated ptflg
+- do not set SysOp and BBS to "UNREGISTERED" anymore if PT is not registered
+- updated docu (new chapter for environment variables)
+- dropped From, To and Origin commandline parameters
++ Hatch: now checking if the area exists, using the address from the area
+  for From, To and Origin
 + preliminary fidoconfig-support
 

@@ -23,7 +23,7 @@ FILELISTZIP=/husky/files/24350424.zip
 # path and filename of temporary directory list
 DIRLIST=/husky/work/filearea.lst
 # fileareas basepath, will be stripped from areanames
-BASEPATH=/husky/file
+BASEPATH=/husky/files
 # filelist header
 HEADERFILE=/husky/cfg/filelist.head
 # ifcico request-map

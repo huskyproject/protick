@@ -360,6 +360,7 @@ Function Addr2Str(Addr: TNetAddr): String;
 Function Addr2StrND(Addr: TNetAddr): String;
 Procedure Str2Addr(s: String; var Addr: TNetAddr);
 Function CompAddr(A1, A2: TNetAddr): Boolean;
+Procedure CopyAddr(var A1:TNetAddr; A2: TNetAddr);
 Procedure MKAddr2TNetAddr(MKAddr: AddrType; Var A1: TNetAddr);
 Procedure TNetAddr2MKAddr(A1: TNetAddr; Var MKAddr: AddrType);
 
@@ -459,6 +460,15 @@ Var
   c := c and (A1.Point = A2.Point);
   c := c and ((A1.Domain = '') or (A2.Domain = '') or (UpStr(A1.Domain) = UpStr(A2.Domain)));
   CompAddr := c;
+  End;
+
+Procedure CopyAddr(var A1:TNetAddr; A2: TNetAddr);
+  Begin
+  A1.Zone := A2.Zone;
+  A1.Net := A2.Net;
+  A1.Node := A2.Node;
+  A1.Point := A2.Point;
+  A1.Domain := A2.Domain;
   End;
 
 Procedure MKAddr2TNetAddr(MKAddr: AddrType; Var A1: TNetAddr);

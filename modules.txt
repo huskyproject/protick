@@ -1,0 +1,130 @@
+
+New concept for 1.0: everything in objects, mainly PChars instead of strings
+
+FileBase
+- unit
+- files.bbs
+- files.lng
+- files.idx (dates for NewFilesHatch)
+- (nearly) unlimited description length
+
+Cfg
+- unit
+- use fidoconfig (statically linked under DOS)
+- use inline-functions for using Cfg
+
+Log
+- unit
+- only binkley-style
+
+Outbound
+- unit
+- supported outbounds:
+  - Binkley Domain
+  - new FD
+  - T-Mail fileboxes
+- interface:
+  - CheckBusy, SetBusy, UnSetBusy
+  - SendFile, CheckFileSent
+  - ArchiveName (BT: in outbound, TMail: in filebox, FD: subdirs in TicDir)
+  - PurgeArchs (remove archives with zero length)
+
+MsgBase
+- unit
+- using smapi (statically linked under DOS)
+
+Dupes
+- unit
+- add Dupe-Entry
+- check for Dupe
+- purge Dupes
+
+Announce
+- unit
+- add File
+  - AddFile(Area: PArea; Name: PChar; Desc: PChar; From: TNetAddr)
+- write Announces
+  - WriteAnnounces
+- NetMail-Announces
+- EchoMail-Announces
+  - Announce-Groups
+- using Templates (MsgHeader, MsgFooter, GroupHeader, GroupFooter, File)
+
+TICFile
+- unit
+- ADT (Abstract Data Type) Tic
+- Read
+- Write
+- Get/Set
+- Clone
+
+Misc
+- unit
+- check busy file
+- MsgID
+- append error message to TIC
+  - AppendErrorStrTIC(ErrNum: Byte)
+- create newareas.pt, areas.log
+  - AddAutoCreatedArea(name: string)
+  - AddProcessedArea(name: string)
+  - WriteAutoCreatedAreas
+  - WriteProcessedAreas
+  - using PChar-B-Tree
+- Addr2Str
+- Str2Addr
+- CompAddr
+- CopyAddr
+- some global types
+
+BTree
+- unit
+- generic B-Tree
+- PChar-B-Tree
+- Address+Pointer-B-Tree
+
+Toss
+- program
+- ScanForTICs
+- read TIC (using unit TIC)
+- CheckTIC
+- AutoCreate
+- ProcessTIC
+- ForwardTIC
+  - AddToArcList
+
+FileFix
+- program
+
+NFH (NewFilesHatch)
+- program
+
+UnPack
+- program
+- look for archives in inbound and unpack them
+
+Pack
+- program
+- pack TICs and files in outbound
+  - AllFix-style
+  - FileScan-style
+  - MTic-style
+- readArcList
+
+Hatch
+- program
+- command-line
+- ncurses-interface
+
+Maint
+- program
+- remove obsolete passthrough-files
+- purge Dupes (using unit Dupes)
+
+ProTick
+- wrapper for UnPack, Toss, Scan, Hatch, NFH, Maint, Pack
+
+
+No more RegKeys, release under GPL.
+Not using GeneralP.pas and Types.pas anymore.
+Generate .deb- and .rpm- Binary(elf-i386-glibc2)/Source-Packages.
+

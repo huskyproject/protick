@@ -7,6 +7,9 @@ Uses
 {$IfDef Linux}
  Linux,
 {$EndIf}
+{$IfDef DOS}
+ CRT,
+{$EndIf}
  DOS,
  Types, GeneralP,
  Log,

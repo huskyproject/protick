@@ -2,3 +2,8 @@ protick
 genkey
 fconftest
 *.ppu
+protick.tp
+protick.dsk
+protick.psm
+protick.exe
+rtm.exe

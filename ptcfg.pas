@@ -1315,18 +1315,10 @@ Procedure ParseCfg;
      End
     Else DirPerm := FilePerm;
 
-    If (RegInfo.Ver = 0) then
-      Begin
-      Cfg^.SysOp := 'UNREGISTERED';
-      Cfg^.BBS := 'UNREGISTERED';
-      End
-    Else
-      Begin
-      Cfg^.SysOp := RepEnv(ReadEntry('GENERAL', 'SYSOP'));
-      If (Cfg^.SysOp = '') then IniError('No SysOp name defined!');
-      Cfg^.BBS := RepEnv(ReadEntry('GENERAL', 'BBS'));
-      If (Cfg^.BBS = '') then IniError('No BBS name defined!');
-      End;
+    Cfg^.SysOp := RepEnv(ReadEntry('GENERAL', 'SYSOP'));
+    If (Cfg^.SysOp = '') then IniError('No SysOp name defined!');
+    Cfg^.BBS := RepEnv(ReadEntry('GENERAL', 'BBS'));
+    If (Cfg^.BBS = '') then IniError('No BBS name defined!');
 
     ParseAddrs;
     ParseDomains;
