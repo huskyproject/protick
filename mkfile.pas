@@ -15,7 +15,7 @@ Uses Dos,
      BseDOS, BseDev,
 {$ENDIF}
 {$IfDef UNIX}
-     UNIX,
+     linux,
 {$EndIf}
      GeneralP;
 
@@ -443,7 +443,7 @@ end;
 Function LockFile(Var F; LockStart: LongInt; LockLength: LongInt): Word;
  Begin
  FLock(file(f), Lock_Ex);
- LockFile := UNIXError;
+ LockFile := linuxError;
  End;
  {$Else}
 
@@ -527,7 +527,7 @@ end;
 Function UnLockFile(Var F; LockStart: LongInt; LockLength: LongInt): Word;
  Begin
  FLock(file(f), Lock_Un);
- UnLockFile := UNIXError;
+ UnLockFile := linuxError;
  End;
  {$Else}
 

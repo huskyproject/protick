@@ -2570,7 +2570,7 @@ Var
       GetMem(CurAnnFile^.Desc, 65535);
       StrCopy(Pointer(CurAnnFile^.Desc), Pointer(Desc));
       pc := Pointer(StrNew(Pointer(CurAnnFile^.Desc)));
-      StrDispose(Pointer(CurAnnFile^.Desc));
+{      StrDispose(Pointer(CurAnnFile^.Desc)); }
       CurAnnFile^.Desc := pc;
       End;
     End

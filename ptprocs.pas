@@ -3,7 +3,7 @@ InterFace
 
 Uses
 {$IfDef UNIX}
-  UNIX,
+  linux,
 {$EndIf}
   DOS, Strings,
   Types, GeneralP, Log,

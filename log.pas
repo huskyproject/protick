@@ -3,7 +3,7 @@ Interface
 
 Uses
 {$IfDef UNIX}
- UNIX,
+ linux,
 {$EndIf}
  Types, GeneralP;
 

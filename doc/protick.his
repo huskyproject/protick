@@ -353,3 +353,6 @@ Version 0.9beta3
 - ignoring date in Tics from FileScan (yet another workaround for bugs in
   other programs :( )
 
+Version 0.9beta4
+* fixed segfault while announcing
+

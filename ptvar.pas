@@ -23,7 +23,7 @@ Const
  {$EndIf}
 {$EndIf}
 
-  + '0.9beta3';
+  + '0.9beta4';
 
 Var
   Version: String;

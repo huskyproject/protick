@@ -5,7 +5,7 @@ Interface
 
 Uses
 {$IfDef UNIX}
- UNIX,
+ linux,
 {$EndIf}
  DOS,
  Types, GeneralP,
