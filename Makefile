@@ -31,6 +31,6 @@ distclean: clean
 install: protick$(EXE)
 	$(INSTALL) $(IBOPT) protick$(EXE) $(BINDIR)
 
-install:
+uninstall:
 	-$(RM) $(BINDIR)$(DIRSEP)protick$(EXE)
 
