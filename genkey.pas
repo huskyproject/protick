@@ -1,5 +1,6 @@
 Program GenKey;
 Uses
+  Linux,
   Types, GeneralP, CRC,
   TickType,
   PTRegKey;
