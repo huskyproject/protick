@@ -1,12 +1,17 @@
 
 New concept for 1.0: everything in objects, mainly PChars instead of strings
 
+Modules:
+
 FileBase
 - unit
 - files.bbs
 - files.lng
 - files.idx (dates for NewFilesHatch)
 - (nearly) unlimited description length
+- using charset conversion
+- Touch, ArcTouch
+- reformat descriptions
 
 Cfg
 - unit
@@ -49,14 +54,32 @@ Announce
 - EchoMail-Announces
   - Announce-Groups
 - using Templates (MsgHeader, MsgFooter, GroupHeader, GroupFooter, File)
+- using charset conversion
+- reformat descriptions
 
 TICFile
 - unit
 - ADT (Abstract Data Type) Tic
-- Read
-- Write
-- Get/Set
-- Clone
+  - Read
+  - Write
+  - Get/Set
+  - Clone
+
+Chrs
+- unit
+- charset conversion
+
+NLS
+- unit
+- National Language Support
+- perhaps using GNU gettext
+- formats like "argument 1: %1, argument 3: %3, argument 2: %2\n"
+
+Template
+- unit
+- template parser
+  - Input: Filename, Array of PChars with Variable-Names and Values
+  - Output: PChar with whole text
 
 Misc
 - unit
@@ -74,6 +97,7 @@ Misc
 - Str2Addr
 - CompAddr
 - CopyAddr
+- write netmail on errors
 - some global types
 
 BTree
@@ -87,16 +111,32 @@ Toss
 - ScanForTICs
 - read TIC (using unit TIC)
 - CheckTIC
+  - CheckSize
 - AutoCreate
+  - areaname masks like "BBS-*" for all BBSNet-Areas
+    (<one AKA, multiple groups>-problem)
 - ProcessTIC
 - ForwardTIC
   - AddToArcList
+    - using Address+Pointer-B-Tree
+- Extract and use FILE_ID.DIZ / LSM, order configurable
+- write magics from TIC to a configurable file (add/replace appropriate line)
+- execute script after single files / each file
 
 FileFix
 - program
+- forward requests to uplinks
+- %From
+- remote maintenance
+- %Info
+- %Notify
+- all responses in one msg
+- response templates
+- ReScan
 
 NFH (NewFilesHatch)
 - program
+- Exclude
 
 UnPack
 - program
@@ -119,9 +159,14 @@ Maint
 - program
 - remove obsolete passthrough-files
 - purge Dupes (using unit Dupes)
+- purge old files from filebase
+
+FileFind
+- answer to echomail search requests like AllFix
 
 ProTick
 - wrapper for UnPack, Toss, Scan, Hatch, NFH, Maint, Pack
+
 
 
 No more RegKeys, release under GPL.

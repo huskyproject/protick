@@ -28,7 +28,6 @@ after 1.0:
 - reformat descriptions
 - ReScan
 - FileFind-System
-- CostSharing
 - language file
 - execute script after single files / each file
 
