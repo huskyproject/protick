@@ -76,7 +76,7 @@ echo generating temporary reqmap, filelist and okfile
 
 # init files
 echo > ${TEMPREQMAP}
-echo @FILES $FILELIST > $TEMPOKFILE
+echo @FILES $FILELISTZIP > $TEMPOKFILE
 cat $MAGICFILE >> $TEMPOKFILE
 
 # copy static header to filelist
