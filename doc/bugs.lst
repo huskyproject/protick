@@ -1,0 +1,2 @@
+- Permissions do not work correctly (Juergen Heisel, Rene Gieling)
+- Maint does endless loop under NDOS
