@@ -2,12 +2,12 @@ Unit Types; {Stellt verschiedene Typen und Objekte zur VerfÅgung}
 interface
 
 type
-{$IfDef GPC}
+{$IfDef __GPC__}
      {integer varies per target machine, usually 32Bit}
      ShortInt           = __byte__ integer;      {8  Bit, s}
      Byte               = __unsigned__ ShortInt; {8  Bit, u}
      _Integer           = __short__ integer;     {16 Bit, s}
-     Word               = __unsigned__ int;      {16 Bit, u}
+     Word               = __unsigned__ integer;  {16 Bit, u}
      LongInt            = __long__ integer;      {32 Bit, s}
      ULong              = __unsigned__ LongInt;  {32 Bit, u}
      Comp               = __longlong__ Integer;  {64 Bit, s}

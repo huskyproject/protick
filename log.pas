@@ -2,8 +2,8 @@ Unit Log; {In LogDateien schreiben}
 Interface
 
 Uses
-{$IfDef Linux}
- Linux,
+{$IfDef UNIX}
+ UNIX,
 {$EndIf}
  Types, GeneralP;
 
@@ -188,7 +188,7 @@ If IOResult <> 0 then WriteLn('Kann LogFile ', LogFiles[Handle]^.Name,
                               ' nicht schliessen!')
 Else
  Begin
-{$IfDef Linux}
+{$IfDef UNIX}
  ChMod(LogFiles[Handle]^.Name, FilePerm);
 {$EndIf}
  End;

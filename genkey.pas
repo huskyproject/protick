@@ -1,6 +1,6 @@
 Program GenKey;
 Uses
-  Linux,
+  UNIX,
   Types, GeneralP, CRC,
   TickType,
   PTRegKey;
@@ -137,7 +137,7 @@ WriteLn('Version:  ', RegInfo.Ver);
 WriteLn('Copies:   ', RegInfo.Copies);
 WriteLn;
 WriteLn('<Enter>');
-{$IfDef Linux}
+{$IfDef UNIX}
 ChMod('protick.key', 288);
 {$EndIf}
 ReadLn;

@@ -3,7 +3,10 @@ Unit MKString;
 
 Interface
 
-Uses {Objects, }Dos,
+Uses
+{$ifndef __GPC__} 
+Dos,
+{$endif}
 {$IfDef VirtualPascal}
 Use32,
 {$EndIf}

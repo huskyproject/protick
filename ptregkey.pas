@@ -125,7 +125,7 @@ Var
   FSplit(ParamStr(0), Dir, s1, s1);
   s2 := GetEnv('PT');
   FSplit(GetEnv('FIDOCONFIG'), s3, s1, s1);
-{$IfDef Linux}
+{$IfDef UNIX}
   s1 := FSearch('protick.key', '.;'+Dir+';'+s2+';'+s3+';/etc/fido');
 {$Else}
   s1 := FSearch('protick.key', '.;'+Dir+';'+s2+';'+s3+';c:\fido');

@@ -7,7 +7,9 @@ Unit MKGlobT;
 
 Interface
 
+{$ifndef GPC}
 Uses Dos;
+{$endif}
 
 type
   OldAddrType = record

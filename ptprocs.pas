@@ -2,8 +2,8 @@ Unit PTProcs;
 InterFace
 
 Uses
-{$IfDef Linux}
-  Linux,
+{$IfDef UNIX}
+  UNIX,
 {$EndIf}
   DOS, Strings,
   Types, GeneralP, Log,
@@ -109,7 +109,7 @@ Var
     Error := DOSExitCode(Exec(GetEnv('COMSPEC'), '/C '+s));
  {$EndIf}
 {$Else}
- {$IfDef Linux}
+ {$IfDef UNIX}
     Shell(s);
     Error := DOSExitCode;
  {$Else}
@@ -205,7 +205,7 @@ Var
   Error := DosExitCode(Exec(GetEnv('COMSPEC'), '/C '+s));
  {$EndIf}
 {$Else}
- {$IfDef Linux}
+ {$IfDef UNIX}
   Shell(s);
   Error := DOSExitCode;
  {$Else}
@@ -302,7 +302,7 @@ Var
   PPos := 0;
   Desc^[0] := #0;
   FSplit(FName, Dir, Name, Ext);
-{$IfNDef Linux}
+{$IfNDef UNIX}
   Name := UpStr(Name);
   Ext := UpStr(Ext);
 {$EndIf}
@@ -314,13 +314,13 @@ Var
       Begin
       ReadLn(f, s);
       If (s[Byte(s[0])] = #13) then s[0] := Char(Byte(s[0])-1);
-{$IfDef Linux}
+{$IfDef UNIX}
       If (Pos(Name+Ext, s) = 1) then Break;
 {$Else}
       If (Pos(Name+Ext, UpStr(s)) = 1) then Break;
 {$EndIf}
       End;
-{$IfDef Linux}
+{$IfDef UNIX}
     If (Pos(Name+Ext, s) = 1) then
 {$Else}
     If (Pos(Name+Ext, UpStr(s)) = 1) then
@@ -386,7 +386,7 @@ Var
 
  {get names of files.bbs and files.tmp, open them}
  FSplit(FName, Dir, Name, Ext);
-{$IfNDef Linux}
+{$IfNDef UNIX}
  Name := UpStr(Name) + UpStr(Ext);
 {$Else}
  Name := Name + Ext;
@@ -412,7 +412,7 @@ Var
    Begin
    ReadLn(FilesBBS, Line);
    {filenames begin at first char of line}
-{$IfDef Linux}
+{$IfDef UNIX}
    If (Pos(Name, Line) = 1) then
 {$Else}
    If (Pos(Name, UpStr(Line)) = 1) then
@@ -541,7 +541,7 @@ Var
  {close files, replace files.bbs by files.tmp}
  If not NewFilesBBS then Close(FilesBBS);
  Close(FilesTMP);
-{$IfDef Linux}
+{$IfDef UNIX}
  ChMod(Dir+'files.tmp', FilePerm);
 {$EndIf}
  If not RepFile(Dir+'files.tmp', Dir+'files.bbs') then
@@ -559,7 +559,7 @@ Var
  s, SNameU: String;
 
  Begin
-{$IfNDef Linux}
+{$IfNDef UNIX}
  SNameU := UpStr(SName);
 {$EndIf}
  Found := False;
@@ -579,14 +579,14 @@ Var
    Begin
    ReadLn(f1, s);
    If (s[Byte(s[0])] = #13) then s[0] := Char(Byte(s[0])-1);
-{$IfDef Linux}
+{$IfDef UNIX}
    If (copy(s, 1, Pos(' ', s)-1) = SName) then {replace entry}
 {$Else}
    If (UpStr(copy(s, 1, Pos(' ', s)-1)) = SNameU) then {replace entry}
 {$EndIf}
     Begin
     Found := True;
-{$IfDef Linux}
+{$IfDef UNIX}
     WriteLn(f2, SName + ' ' + LName);
 {$Else}
     WriteLn(f2, SNameU + ' ' + LName);
@@ -607,7 +607,7 @@ Var
    LogWriteLn(LogHandle, 'Could not delete "'+Path+DirSep+'files.lng"!');
    End;
   End;
-{$IfDef Linux}
+{$IfDef UNIX}
  If not Found then WriteLn(f2, SName + ' ' + LName); {append entry}
 {$Else}
  If not Found then WriteLn(f2, SNameU + ' ' + LName); {append entry}
@@ -620,7 +620,7 @@ Var
   End
  Else
   Begin
-{$IfDef Linux}
+{$IfDef UNIX}
   ChMod(Path+DirSep+'files.tmp', FilePerm);
 {$EndIf}
   End;
@@ -698,7 +698,7 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$IfDef UNIX}
    ChMod(Cfg^.NewAreasLst, FilePerm);
 {$EndIf}
    End;
@@ -742,7 +742,7 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$IfDef UNIX}
    ChMod(Cfg^.AreasLog, FilePerm);
 {$EndIf}
    End;
@@ -787,7 +787,7 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$IfDef UNIX}
    ChMod(Cfg^.BBSAreaLog, FilePerm);
 {$EndIf}
    End;
@@ -978,7 +978,7 @@ Var
   PTCC := PTC;
   While (PTCC <> NIL) and (PTCC^.Next <> NIL) do
    Begin
-{$IfDef Linux}
+{$IfDef UNIX}
    If (PTCC^.a.FileName = fn) then
 {$Else}
    If (UpStr(PTCC^.a.FileName) = UpStr(fn)) then
@@ -1073,7 +1073,7 @@ Var
    LogWriteLn(LogHandle, 'Could not close "'+Cfg^.PTLst+'"!');
    Exit;
    End;
-{$IfDef Linux}
+{$IfDef UNIX}
   ChMod(Cfg^.PTLst, FilePerm);
 {$EndIf}
   PTCC := PTC;
@@ -1177,7 +1177,7 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$IfDef UNIX}
    ChMod(TmpName, FilePerm);
 {$EndIf}
    End;
@@ -1228,7 +1228,7 @@ Var
   Begin
   Write(MsgIDFile, CurMsgID, #13#10);
   Close(MsgIDFile);
-{$IfDef Linux}
+{$IfDef UNIX}
   ChMod(Cfg^.MsgIDFile, FilePerm);
 {$EndIf}
   End;

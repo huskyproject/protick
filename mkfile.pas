@@ -14,8 +14,8 @@ Uses Dos,
 {$IFDEF SPEED}
      BseDOS, BseDev,
 {$ENDIF}
-{$IfDef Linux}
-     Linux,
+{$IfDef UNIX}
+     UNIX,
 {$EndIf}
      GeneralP;
 
@@ -439,11 +439,11 @@ begin
   LockFile := DosSetFileLocks(FileRec(F).Handle, unlock, lock, 1000, 0);
 end;
 {$ELSE}
- {$IfDef Linux}
+ {$IfDef UNIX}
 Function LockFile(Var F; LockStart: LongInt; LockLength: LongInt): Word;
  Begin
  FLock(file(f), Lock_Ex);
- LockFile := LinuxError;
+ LockFile := UNIXError;
  End;
  {$Else}
 
@@ -523,11 +523,11 @@ begin
 end;
 
 {$ELSE}
- {$IfDef Linux}
+ {$IfDef UNIX}
 Function UnLockFile(Var F; LockStart: LongInt; LockLength: LongInt): Word;
  Begin
  FLock(file(f), Lock_Un);
- UnLockFile := LinuxError;
+ UnLockFile := UNIXError;
  End;
  {$Else}
 

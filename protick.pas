@@ -1,41 +1,48 @@
 Program ProTick;
 {$I-}{$Q-}
-{$IfDef SPEED}
+{$ifdef SPEED}
 {$Else}
- {$IfDef VIRTUALPASCAL}
+ {$ifdef VIRTUALPASCAL}
   {$Define VP}
   {$M 65520}
  {$Else}
   {$M 65520, 0, 655360}
- {$EndIf}
-{$EndIf}
-{$IfDef FPC}
+ {$endif}
+{$endif}
+{$ifdef FPC}
  {$PackRecords 1}
-{$EndIf}
+{$endif}
 
 Uses
-{$IfDef SPEED}
+{$ifdef SPEED}
   BseDOS, BseDev,
-{$EndIf}
-{$IfDef Linux}
-  Linux,
-{$EndIf}
-  DOS, Strings,
+{$endif}
+{$ifdef UNIX}
+ {$ifdef FPC}
+  linux,
+ {$endif}
+{$endif}
+{$ifndef __GPC__}
+  DOS,
+{$endif}
+{$ifndef __GPC__}
+  strings,
+{$endif}
   MKGlobT, MKMisc, MKMsgAbs, MKMsgFid, MKMsgEzy, MKMsgJam, MKMsgHud, MKMsgSqu,
   Types, GeneralP,
   CRC, Log, IniFile,
   PTRegKey,
   TickCons, TickType, PTProcs, PTVar, PTMsg, PTOut,
-{$IfDef FIDOCONF}
+{$ifdef FIDOCONF}
   smapi, fidoconf, PTFConf;
 {$Else}
   PTCfg;
-{$EndIf}
-{$IfDef VP}
- {$IfDef VPDEMO}
+{$endif}
+{$ifdef VP}
+ {$ifdef VPDEMO}
   {$Dynamic VP11DEMO.LIB}
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
 
 Procedure Toss; Forward;
 Procedure Hatch; Forward;
@@ -287,10 +294,10 @@ Var
   CurTossList := NIL;
   CreatedBsy := False;
   Randomize;
-{$IfDef SPEED}
+{$ifdef SPEED}
   ExecViaSession := False;
   AsynchExec := False;
-{$EndIf}
+{$endif}
   GetMem(HDesc, 65535);
   HDesc^[0] := #0;
   If (RegInfo.Ver <> 0) then
@@ -316,11 +323,11 @@ Var
   Command := '';
   FSplit(ParamStr(0), s1, s, s);
   s := GetEnv('PT');
-{$IfDef Linux}
+{$ifdef UNIX}
   s := FSearch('protick.cfg', '.;'+s+';/etc/fido');
 {$Else}
   s := FSearch('protick.cfg', '.;'+s+';c:\fido;'+s1);
-{$EndIf}
+{$endif}
   CfgName := s;
   If (ParamCount < 1) then
     Begin
@@ -393,19 +400,19 @@ Var
 Procedure Toss;
 Var
   FName: String;
-{$IfDef SPEED}
+{$ifdef SPEED}
   SRec: TSearchRec;
 {$Else}
   SRec: SearchRec;
-{$EndIf}
+{$endif}
   f: Text;
   Line: String;
   Tic: PTick;
-{$IfDef VIRTUALPASCAL}
+{$ifdef VIRTUALPASCAL}
   Error: LongInt;
 {$Else}
   Error: Integer;
-{$EndIf}
+{$endif}
   s: String;
   s1: String;
   i: LongInt;
@@ -642,7 +649,7 @@ Var
   LogWriteLn(LogHandle, 'Toss');
   FSplit(CfgName, s, s1, s1);
   Assign(ArcList, Cfg^.ArcLst);
-{$IfDef SPEED}
+{$ifdef SPEED}
   {$I-} Append(ArcList); {$I+}
   If (IOResult <> 0) then
     Begin
@@ -656,7 +663,7 @@ Var
       End;
     End;
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
   If (DosAppend(ArcList) <> 0) then
     Begin
     LogSetCurLevel(LogHandle, 1);
@@ -672,10 +679,10 @@ Var
     Done;
     Halt(Err_ArcList);
     End;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
   Assign(PTList, Cfg^.PTLst);
-{$IfDef SPEED}
+{$ifdef SPEED}
   {$I-} Append(PTList); {$I+}
   If (IOResult <> 0) then
     Begin
@@ -689,7 +696,7 @@ Var
       End;
     End;
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
   If (DosAppend(PTList) <> 0) then
     Begin
     LogSetCurLevel(LogHandle, 1);
@@ -705,8 +712,8 @@ Var
     Done;
     Halt(Err_PTList);
     End;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
   If (Cfg^.NumArcNames > 0) then
    Begin
    LogSetCurLevel(LogHandle, 5);
@@ -740,9 +747,9 @@ Var
         End;
        FindNext(SRec);
        End;
-{$IfDef OS2}
+{$ifdef OS2}
      FindClose(SRec);
-{$EndIf}
+{$endif}
      End;
    If Debug then
      Begin
@@ -790,9 +797,9 @@ Var
       ReadLn(s);
       If (UpStr(s) = 'BREAK') then
         Begin
-{$IfDef OS2}
+{$ifdef OS2}
         FindClose(SRec);
-{$EndIf}
+{$endif}
         Dispose(Tic);
         Tic := Nil;
         Exit;
@@ -1199,11 +1206,11 @@ Var
                     LogSetCurLevel(LogHandle, 5);
                     LogWriteLn(LogHandle, 'Added SeenBy "'+Addr2Str(Tic^._To)+'"');
                     End;
-{$IfDef FPC}
+{$ifdef FPC}
                   With Tic^._To do If (not CompAddr(Tic^._To, CurArea^.Addr)) or
 {$Else}
                   With Tic^._To do If (not CompAddr(Tic^._To, CurArea^.Addr)) XOR
-{$EndIf}
+{$endif}
                     ((Zone = 0) and (Net = 0) and (Node = 0) and (Point = 0)) then
                     Begin
                     Inc(Tic^.NumPath);
@@ -1338,9 +1345,9 @@ Var
       ReadLn(s);
       If (UpStr(s) = 'BREAK') then
         Begin
-{$IfDef OS2}
+{$ifdef OS2}
         FindClose(SRec);
-{$EndIf}
+{$endif}
         Dispose(Tic);
         Tic := Nil;
         Exit;
@@ -1348,9 +1355,9 @@ Var
       End;
     FindNext(SRec);
     End;
-{$IfDef OS2}
+{$ifdef OS2}
   FindClose(SRec);
-{$EndIf}
+{$endif}
   Dispose(Tic);
   Tic := Nil;
   {$I-} Close(ArcList); {$I+}
@@ -1361,9 +1368,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.ArcLst, FilePerm);
-{$EndIf}
+{$endif}
    End;
   {$I-} Close(PTList); {$I+}
   If (IOResult <> 0) then
@@ -1373,9 +1380,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.PTLst, FilePerm);
-{$EndIf}
+{$endif}
    End;
   WriteTossArea;
   WriteBBSArea;
@@ -1438,7 +1445,7 @@ Var
         Exit;
         End;
       If (AreaDesc <> '') then Write(f, 'AreaDesc '+AreaDesc+#13#10);
-{$IfDef SPEED}
+{$ifdef SPEED}
       If (Origin <> EmptyAddr) then Write(f, 'Origin ' + Addr2Str(Origin)+#13#10);
       If (Usr^.OwnAddr <> EmptyAddr) then Write(f, 'From '+Addr2Str(Usr^.OwnAddr)+#13#10)
       Else If (CurArea^.Addr <> EmptyAddr) then Write(f, 'From '+Addr2Str(CurArea^.Addr)+#13#10)
@@ -1454,7 +1461,7 @@ Var
         or (CurArea^.Addr.Domain<>'')) then Write(f, 'From ' + Addr2Str(CurArea^.Addr)+#13#10)
       Else If ((_To.Zone<>0) or (_To.Net<>0) or (_To.Node<>0) or (_To.Point<>0)
         or  (_To.Domain<>'')) then Write(f, 'From ' + Addr2Str(_To)+#13#10);
-{$EndIf}
+{$endif}
       Write(f, 'To ' + Usr^.Name + ', ' + Addr2Str(Usr^.Addr)+#13#10);
       Write(f, 'File '+ Name+#13#10);
       If (Desc <> '') then Write(f, 'Desc '+Desc+#13#10);
@@ -1483,9 +1490,9 @@ Var
         LogSetCurLevel(LogHandle, 1);
         LogWriteLn(LogHandle, 'Couldn''t close "'+fn+'"!');
         End;
-{$IfDef Linux}
+{$ifdef UNIX}
       ChMod(fn, FilePerm);
-{$EndIf}
+{$endif}
       If (Usr^.PackTICs or Usr^.PackFiles) then
         Begin
         If Usr^.PackFiles then
@@ -1625,7 +1632,7 @@ Var
   Begin
   Today(DT); Now(DT);
   Assign(f, Cfg^.DupeFile);
-{$IfDef SPEED}
+{$ifdef SPEED}
   {$I-} Append(f); {$I+}
   If (IOResult <> 0) then
     Begin
@@ -1638,7 +1645,7 @@ Var
       End;
     End;
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
  If (DosAppend(f) <> 0) then
    Begin
    LogSetCurLevel(LogHandle, 1);
@@ -1652,8 +1659,8 @@ Var
    LogWriteLn(LogHandle, 'Couldn''t open "'+Cfg^.DupeFile+'"!');
    Exit;
    End;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
   CurEntry.Area := Tic^.Area;
   CurEntry.Name := Tic^.Name;
   CurEntry.CRC := Tic^.CRC;
@@ -1672,9 +1679,9 @@ Var
     End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.DupeFile, FilePerm);
-{$EndIf}
+{$endif}
    End;
   End;
 
@@ -1715,9 +1722,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.LNameLst, FilePerm);
-{$EndIf}
+{$endif}
    End;
   End;
 
@@ -1874,7 +1881,7 @@ Var
     End;
   WriteLn(f, 'File '+Name+Ext);
   WriteLn(f, 'Area '+HArea);
-{$IfDef SPEED}
+{$ifdef SPEED}
   If (HFrom <> EmptyAddr) then WriteLn(f, 'From '+Addr2Str(HFrom));
   If (HTo <> EmptyAddr) then WriteLn(f, 'To '+Addr2Str(HTo));
   If (HOrigin <> EmptyAddr) then WriteLn(f, 'Origin '+Addr2Str(HOrigin));
@@ -1885,7 +1892,7 @@ Var
         or  (Domain<>'')) then WriteLn(f, 'To '+Addr2Str(HTo));
       With HOrigin do If ((Zone<>0) or (Net<>0) or (Node<>0) or (Point<>0)
         or  (Domain<>'')) then WriteLn(f, 'Origin '+Addr2Str(HOrigin));
-{$EndIf}
+{$endif}
   If (HDesc^[0] > #0) then
     Begin
     If (StrPos(Pointer(HDesc), Pointer(crlf)) = NIL) then WriteLn(f, 'Desc '+StrPas(Pointer(HDesc)))
@@ -1909,16 +1916,16 @@ Var
           Inc(i);
           End;
         WriteLn(f);
-{$IfDef OS2}
+{$ifdef OS2}
         HDesc := Pointer(StrPos(Pointer(HDesc), Pointer(crlf))+2);
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
         HDesc := Pointer(StrPos(Pointer(HDesc), Pointer(crlf))+2);
  {$Else}
         HDesc := Pointer(StrPos(Pointer(HDesc), Pointer(crlf)));
         MemW[Seg(HDesc):Ofs(HDesc)+2] := MemW[Seg(HDesc):Ofs(HDesc)+2] + 2;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
         End;
       If (HDesc^[i] > #0) then
         Begin
@@ -1945,9 +1952,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(s, FilePerm);
-{$EndIf}
+{$endif}
    End;
   FreeMem(crlf, 3);
   FreeMem(pc, 256);
@@ -1957,11 +1964,11 @@ Var
 Procedure NewFilesHatch;
 Var
   FName: String;
-{$IfDef SPEED}
+{$ifdef SPEED}
   SRec: TSearchRec;
 {$Else}
   SRec: SearchRec;
-{$EndIf}
+{$endif}
   f: Text;
   DT: TimeTyp;
   DOW: Word;
@@ -2054,9 +2061,9 @@ Var
         End;
       FindNext(SRec);
       End;
-{$IfDef OS2}
+{$ifdef OS2}
     FindClose(SRec);
-{$EndIf}
+{$endif}
     If (CurArea^.Next <> NIL) then CurArea := CurArea^.Next;
     End;
   End;
@@ -2131,11 +2138,11 @@ Var
     While SeekFound do
       Begin
       InitMsgHdr;
-{$IfDef Linux}
+{$ifdef UNIX}
       WriteLn('Msg #', GetMsgDisplayNum);
 {$Else}
       Write(#13'Msg #', GetMsgDisplayNum, '     ');
-{$EndIf}
+{$endif}
       GetDest(MKAddr);
       MKAddr2TNetAddr(MKAddr, A1);
       bo := False;
@@ -2336,7 +2343,7 @@ Var
   Assign(ArcList, Cfg^.ArcLst);
   Assign(PTList, Cfg^.PTLst);
   Assign(f, ListName);
-{$IfDef SPEED}
+{$ifdef SPEED}
   {$I-} Append(PTList); {$I+}
   If (IOResult <> 0) then
     Begin
@@ -2350,7 +2357,7 @@ Var
       End;
     End;
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
   If (DosAppend(PTList) <> 0) then
     Begin
     LogSetCurLevel(LogHandle, 1);
@@ -2366,8 +2373,8 @@ Var
     Done;
     Halt(Err_PTList);
     End;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
   {$I-} ReSet(ArcList); {$I+}
   If (IOResult <> 0) then Exit;
   If EOF(ArcList) then
@@ -2426,9 +2433,9 @@ Var
         End
       Else
        Begin
-{$IfDef Linux}
+{$ifdef UNIX}
        ChMod(ListName, FilePerm);
-{$EndIf}
+{$endif}
        End;
       If not Pack(CurUser^.Packer, PackName, ListName) then
        Begin
@@ -2476,9 +2483,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.ArcLst, FilePerm);
-{$EndIf}
+{$endif}
    End;
   {$I-} Close(PTList); {$I+}
   If (IOResult <> 0) then
@@ -2488,9 +2495,9 @@ Var
    End
   Else
    Begin
-{$IfDef Linux}
+{$ifdef UNIX}
    ChMod(Cfg^.PTLst, FilePerm);
-{$EndIf}
+{$endif}
    End;
   ACC := AC;
   While (ACC <> NIL) do
@@ -2825,11 +2832,11 @@ Var
               ODesc := Desc;
               b := False;
               p := StrPos(Pointer(Desc), Pointer(crlf));
-{$IfDef OS2}
+{$ifdef OS2}
               While (p <> NIL) and (p < StrEnd(Pointer(Desc))) do
 {$Else}
               While (p <> NIL) do
-{$EndIf}
+{$endif}
                 Begin
                 If not b then b := True Else DoString(Copy(Leer, 1, 34));
                 i := 0;
@@ -2838,16 +2845,16 @@ Var
                   Inc(i);
                   Until (Desc^[i] = #13) and (Desc^[i+1] = #10);
                 DoStringLn('');
-{$IfDef OS2}
+{$ifdef OS2}
                 Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf))+2);
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
                 Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf))+2);
  {$Else}
                 Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf)));
                 MemW[Seg(Desc):Ofs(Desc)+2] := MemW[Seg(Desc):Ofs(Desc)+2] + 2;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
                 p := StrPos(Pointer(Desc), Pointer(crlf));
                 End;
               If (Desc^[0] <> #0) then
@@ -3042,11 +3049,11 @@ Var
         ODesc := Desc;
         b := False;
         p := StrPos(Pointer(Desc), Pointer(crlf));
-{$IfDef OS2}
+{$ifdef OS2}
         While (p <> NIL) and (p < StrEnd(Pointer(Desc))) do
 {$Else}
         While (p <> NIL) do
-{$EndIf}
+{$endif}
          Begin
          If not b then b := True Else DoString(Copy(Leer, 1, 34));
          i := 0;
@@ -3055,16 +3062,16 @@ Var
           Inc(i);
           Until (Desc^[i] = #13) and (Desc^[i+1] = #10);
          DoStringLn('');
-{$IfDef OS2}
+{$ifdef OS2}
          Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf))+2);
 {$Else}
- {$IfDef FPC}
+ {$ifdef FPC}
          Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf))+2);
  {$Else}
          Desc := Pointer(StrPos(Pointer(Desc), Pointer(crlf)));
          MemW[Seg(Desc):Ofs(Desc)+2] := MemW[Seg(Desc):Ofs(Desc)+2] + 2;
- {$EndIf}
-{$EndIf}
+ {$endif}
+{$endif}
          p := StrPos(Pointer(Desc), Pointer(crlf));
          End;
         If (Desc^[0] <> #0) then

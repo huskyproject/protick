@@ -4,8 +4,8 @@ Interface
 {$Q-}
 
 Uses
-{$IfDef Linux}
- Linux,
+{$IfDef UNIX}
+ UNIX,
 {$EndIf}
  DOS,
  Types, GeneralP,
@@ -278,7 +278,7 @@ Var
   End
  Else
   Begin
-{$IfDef Linux}
+{$IfDef UNIX}
   Chmod(FlowName, FilePerm);
 {$EndIf}
   End;
@@ -292,7 +292,7 @@ Var
  Found: Boolean;
 
  Begin
-{$IfNDef Linux}
+{$IfNDef UNIX}
  FName := UpStr(FName);
 {$EndIf}
  Found := False;
@@ -305,7 +305,7 @@ Var
   ReadLn(f, Line);
   If (Line[1] = '~') then Continue; {skip sent files}
   If (Line[1] in ['#', '^']) then Delete(Line, 1, 1);
-{$IfDef Linux}
+{$IfDef UNIX}
   Found := Found or (Line = FName);
 {$Else}
   Found := Found or (Upstr(Line) = FName);
@@ -322,7 +322,7 @@ Var
    ReadLn(f, Line);
    If (Line[1] = '~') then Continue; {skip sent files}
    If (Line[1] in ['#', '^']) then Delete(Line, 1, 1);
-{$IfDef Linux}
+{$IfDef UNIX}
    Found := Found or (Line = FName);
 {$Else}
    Found := Found or (Upstr(Line) = FName);
@@ -340,7 +340,7 @@ Var
    ReadLn(f, Line);
    If (Line[1] = '~') then Continue; {skip sent files}
    If (Line[1] in ['#', '^']) then Delete(Line, 1, 1);
-{$IfDef Linux}
+{$IfDef UNIX}
    Found := Found or (Line = FName);
 {$Else}
    Found := Found or (Upstr(Line) = FName);
@@ -358,7 +358,7 @@ Var
    ReadLn(f, Line);
    If (Line[1] = '~') then Continue; {skip sent files}
    If (Line[1] in ['#', '^']) then Delete(Line, 1, 1);
-{$IfDef Linux}
+{$IfDef UNIX}
    Found := Found or (Line = FName);
 {$Else}
    Found := Found or (Upstr(Line) = FName);
@@ -963,7 +963,7 @@ Var
     LogWriteLn(lh, 'Creating new STQ');
     WriteHdr;
     Close(STQ);
-{$IfDef Linux}
+{$IfDef UNIX}
     ChMod(STQFile, FilePerm);
 {$EndIf}
     ReSet(STQ, 1);

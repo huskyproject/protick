@@ -12,7 +12,7 @@ Const
 {$IfDef OS2}
  _Version = '/2 '
 {$Else}
- {$IfDef LINUX}
+ {$IfDef UNIX}
  _Version = '/Lx '
  {$Else}
   {$IfDef DPMI}
