@@ -25,7 +25,12 @@ Uses
   Types, GeneralP,
   CRC, Log, IniFile,
   PTRegKey,
-  TickCons, TickType, PTProcs, PTVar, PTMsg, PTCfg, PTOut;
+  TickCons, TickType, PTProcs, PTVar, PTMsg, PTOut,
+{$IfDef FIDOCONF}
+  smapi, fidoconf, PTFConf;
+{$Else}
+  PTCfg;
+{$EndIf}
 {$IfDef VP}
  {$IfDef VPDEMO}
   {$Dynamic VP11DEMO.LIB}
@@ -230,7 +235,7 @@ Var
    End
   Else If not FileExist(CfgName) then
    Begin
-   WriteLn('Couldn''t find "'+CfgName+'"!');
+   WriteLn('Couldn''t open "'+CfgName+'"!');
    Halt(Err_NoCfg);
    End;
   WriteLn;
@@ -910,6 +915,7 @@ Var
                 Else
                  Begin
                  s1 := Translate(s1, ' ', '_');
+                 s1 := Translate(s1, '/', '_');
                  End;
                 s := '';
                 If not Cfg^.LongDirNames then

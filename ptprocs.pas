@@ -86,6 +86,13 @@ Var
       Insert(Arc, s, i);
       i := Pos('%A', s);
       End;
+    i := Pos('%s', s);
+    While (i <> 0) do
+      Begin
+      Delete(s, i, 2);
+      Insert(Arc, s, i);
+      i := Pos('%s', s);
+      End;
     i := Pos('%D', s);
     While (i <> 0) do
       Begin
@@ -166,6 +173,20 @@ Var
     Delete(s, i, 2);
     Insert(fn, s, i);
     i := Pos('%F', s);
+    End;
+  i := Pos('$a', s);
+  While (i <> 0) do
+    Begin
+    Delete(s, i, 2);
+    Insert(Arc, s, i);
+    i := Pos('$a', s);
+    End;
+  i := Pos('$f', s);
+  While (i <> 0) do
+    Begin
+    Delete(s, i, 2);
+    Insert(fn, s, i);
+    i := Pos('$f', s);
     End;
   i := Pos('%', s);
   While (i <> 0) do
@@ -446,7 +467,7 @@ Var
     {add LongDescChar + Spaces}
     If not Cfg^.SingleDescLine then
      Begin
-     Write(FilesTMP, Cfg^.LDescChar);
+     Write(FilesTMP, Cfg^.LDescString);
      If (Cfg^.DescPos > 2) then Write(FilesTMP, Copy(Leer, 1, Cfg^.DescPos-1));
      End
     Else Write(FilesTMP, ' ');
@@ -480,7 +501,7 @@ Var
     {add LongDescChar + Spaces}
     If not Cfg^.SingleDescLine then
      Begin
-     Write(FilesTMP, Cfg^.LDescChar);
+     Write(FilesTMP, Cfg^.LDescString);
      If (Cfg^.DescPos > 2) then Write(FilesTMP, Copy(Leer, 1, Cfg^.DescPos-1));
      End
     Else Write(FilesTMP, ' ');
@@ -648,6 +669,7 @@ Var
 
   Begin
   If (AutoAddList = NIL) then exit;
+  If (Cfg^.NewAreasLst = '') then exit;
   WriteLn('writing newareas.pt');
   Assign(f, Cfg^.NewAreasLst);
   {$I-} Append(f); {$I+}
@@ -689,6 +711,7 @@ Var
 
   Begin
   If (TossList = NIL) then exit;
+  If (Cfg^.AreasLog = '') then exit;
   Assign(f, Cfg^.AreasLog);
   {$I-} Append(f); {$I+}
   Error1 := IOResult;
@@ -732,6 +755,7 @@ Var
 
   Begin
   If (TossList = NIL) then exit;
+  If (Cfg^.BBSAreasLog = '') then exit;
   Assign(f, Cfg^.BBSAreaLog);
   {$I-} Append(f); {$I+}
   Error1 := IOResult;

@@ -1,12 +1,13 @@
 #!/usr/bin/make -f
-PASOPT = -dLinux
+PASOPT = -dFIDOCONF -dUNIX -Fu../fidoconfig -Fu../smapi -k'-L/husky/lib'
 
 all: debug
 
 protick: protick.pas mkglobt.pas mkmisc.pas mkmsgabs.pas mkmsgfid.pas \
  mkmsgezy.pas mkmsgjam.pas mkmsghud.pas mkmsgsqu.pas types.pas generalp.pas \
  crc.pas log.pas inifile.pas ptregkey.pas tickcons.pas ticktype.pas \
- ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas
+ ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas ptconf.pas \
+ ../fidoconf.pas
 	ppc386 $(PASOPT) protick.pas
 
 debug:
@@ -14,6 +15,9 @@ debug:
 
 release:
 	ppc386 $(PASOPT) -dRELEASE protick.pas
+
+ptfconf:
+	ppc386 $(PASOPT) ptfconf.pas
 
 clean:
 	-rm *.o *.ppu *.a *~

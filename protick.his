@@ -327,3 +327,7 @@ Version 0.8beta14
 + Group in %QUERY and %UNLINKED
 + HeaderFile and FooterFile in Announce-Groups
 
+Version 0.9beta1
+- changed LDescChar to LDescString
++ preliminary fidoconfig-support
+

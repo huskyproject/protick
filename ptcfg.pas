@@ -1199,10 +1199,10 @@ Procedure ParseCfg;
 
     Val(RepEnv(ReadEntry('GENERAL', 'DESCPOS')), Cfg^.DescPos, Error);
 
-    If (ReadEntry('GENERAL', 'LDESCCHAR') <> '') then
+    If (ReadEntry('GENERAL', 'LDESCSTRING') <> '') then
      Begin
-     s := ReadEntry('GENERAL', 'LDESCCHAR');
-     Cfg^.LDescChar := s[1];
+     s := ReadEntry('GENERAL', 'LDESCSTRING');
+     Cfg^.LDescString := s;
      End
     Else Cfg^.LDescChar := ' ';
 

@@ -1,5 +1,6 @@
 To do:
 before 1.0:
+- charset conversion
 - linelength > 255 in FILES.BBS
 - extract & use FILE_ID.DIZ / lsm, order TIC / DIZ / LSM configurable
 - forward requests to uplinks

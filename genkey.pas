@@ -14,6 +14,32 @@ Var
   i: Integer;
   p: ^TRegArray;
 
+Function ConvWord(w: Word): Word;
+ Begin
+{$IfDef BigEndian}
+ ConvWord := (w mod 256)*256 + (w SHR 8);
+{$Else}
+ ConvWord := w;
+{$EndIf}
+ End;
+
+Function ConvULong(u: ULong): ULong;
+Var
+ u2: ULong;
+ u2a: Array[1..4] of Byte absolute u2;
+ p1: ^Byte;
+ i: Byte;
+
+ Begin
+{$IfDef BigEndian}
+ p1 := @u;
+ For i := 1 to 4 do Begin u2a[5-i] := p1^; Inc(p1); End;
+ ConvULong := u2;
+{$Else}
+ ConvULong := u;
+{$EndIf}
+ End;
+
 Procedure Crypt(var Key: TRegInfo);
 Var
   p1, p2: ^Byte;
@@ -22,9 +48,20 @@ Var
   s1, s2: String;
 
  Begin
+ {init vars}
  p1 := @Key;  p2 := @NewKey;
  s1[0] := #255; s2[0] := #255;
  For i := 1 to 255 do Begin s1[i] := #0; s2[i] := #0; End;
+
+ {porting stuff}
+ NewKey.Addr.Zone := ConvWord(NewKey.Addr.Zone);
+ NewKey.Addr.Net := ConvWord(NewKey.Addr.Net);
+ NewKey.Addr.Node := ConvWord(NewKey.Addr.Node);
+ NewKey.Addr.Point := ConvWord(NewKey.Addr.Point);
+ NewKey.Serial := ConvULong(NewKey.Serial);
+ NewKey.Copies := ConvULong(NewKey.Copies);
+ NewKey.CryptCRC := ConvULong(NewKey.CryptCRC);
+ NewKey.DeCryptCRC := ConvULong(NewKey.DeCryptCRC);
 
  {calculate CRC, exclude CRCs}
  For i := 1 to SizeOf(TRegInfo)-8 do
@@ -89,9 +126,6 @@ If (IOResult <> 0) then
  WriteLn('Couldn''t close protick.key!');
  Halt(5);
  End;
-{$IfDef Linux}
-ChMod('protick.key', 288);
-{$EndIf}
 WriteLn;
 RegInfo := EvalKey;
 GetKey;
@@ -103,5 +137,8 @@ WriteLn('Version:  ', RegInfo.Ver);
 WriteLn('Copies:   ', RegInfo.Copies);
 WriteLn;
 WriteLn('<Enter>');
+{$IfDef Linux}
+ChMod('protick.key', 288);
+{$EndIf}
 ReadLn;
 End.

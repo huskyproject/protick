@@ -245,7 +245,7 @@ Type
        MgrNames: Array[1..20] of TMgrName;             {   440b}
        NumMgrNames: Byte;                              {     1b}
        DescPos: Byte;                                  {     1b}
-       LDescChar: Char;                                {     1b}
+       LDescString: String[10];                        {    11b}
        AddDLC: Boolean;                                {     1b}
        DLCDig: Byte;                                   {     1b}
        SingleDescLine: Boolean;                        {     1b}
@@ -267,7 +267,7 @@ Type
        PTLst: DirStr;                                  {   151b}
        CreateDirs: Boolean;                            {     1b}
        end;                                            {-------}
-                                                       { 15381b}
+                                                       { 15391b}
 
      TUpLink =
        Record

@@ -39,6 +39,7 @@ Const
   ml_Direct         = 2;
   ml_Hold           = 3;
   ml_Crash          = 4;
+  ml_Imm            = 5;
 
   {User.Flags}
   uf_SendTIC        = 1;

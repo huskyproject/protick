@@ -283,7 +283,7 @@ Table of Contents
 >  DescPos=13
 
    Indent descriptions in FILES.BBS by <DescPos> characters (not counting
-   LDescChar!).
+   LDescString!).
    Example: File "ABC.ZIP", Description-Lines "line1", "line2" and "line3"
 
    DescPos=0
@@ -296,19 +296,19 @@ Table of Contents
        line2
        line3
 
->  LDescChar=
+>  LDescString=
 
-   This char is put before long descriptions in FILES.BBS. If it is not
-   set, it is set to " " (space).
+   This string is put before long descriptions in FILES.BBS. If it is
+   not set, it is set to a single space.
 
    Example: File "ABC.ZIP", Description-Lines "line1", "line2" and "line3"
 
-   LDescChar=+
+   LDescString=+
    ABC.ZIP line1
    +line2
    +line3
 
-   LDescChar=
+   LDescString=
    ABC.ZIP line1
     line2
     line3
