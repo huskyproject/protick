@@ -28,6 +28,9 @@ clean:
 distclean: clean
 	-$(RM) protick$(EXE) genkey$(EXE)
 
-install:
+install: protick$(EXE)
 	$(INSTALL) $(IBOPT) protick$(EXE) $(BINDIR)
+
+install:
+	-$(RM) $(BINDIR)$(DIRSEP)protick$(EXE)
 
