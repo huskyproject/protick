@@ -345,3 +345,7 @@ sms:
 - reorganized Makefiles, please read README.Makefiles in the husky-common
   package!
 
+Version 0.9beta2
+* FileUMask and DirUMask now working
+* moving/copying file as lowercase to inbound when hatching
+

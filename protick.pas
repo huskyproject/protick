@@ -1768,6 +1768,8 @@ Var
   CopyAddr(HOrigin, CurArea^.Addr);
   HPW := Cfg^.LocalPwd;
   FSplit(HFile, Dir, Name, Ext);
+  Name := LowStr(Name);
+  Ext := LowStr(Ext);
   If (Dir <> Cfg^.InBound) then
     Begin
     If HMove then
