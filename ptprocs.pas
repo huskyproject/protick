@@ -755,7 +755,7 @@ Var
 
   Begin
   If (TossList = NIL) then exit;
-  If (Cfg^.BBSAreasLog = '') then exit;
+  If (Cfg^.BBSAreaLog = '') then exit;
   Assign(f, Cfg^.BBSAreaLog);
   {$I-} Append(f); {$I+}
   Error1 := IOResult;

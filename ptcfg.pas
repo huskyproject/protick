@@ -1204,7 +1204,7 @@ Procedure ParseCfg;
      s := ReadEntry('GENERAL', 'LDESCSTRING');
      Cfg^.LDescString := s;
      End
-    Else Cfg^.LDescChar := ' ';
+    Else Cfg^.LDescString := ' ';
 
     If (ReadEntry('GENERAL', 'ADDDLCOUNT') <> '') then
      Begin

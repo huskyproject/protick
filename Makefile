@@ -1,5 +1,6 @@
 #!/usr/bin/make -f
-PASOPT = -dFIDOCONF -dUNIX -Fu../fidoconfig -Fu../smapi -k'-L/husky/lib'
+#PASOPT = -dFIDOCONF -dUNIX -Fu../fidoconfig -Fu../smapi -k'-L/husky/lib'
+PASOPT = -dUNIX
 
 all: debug
 
