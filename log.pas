@@ -1,114 +1,107 @@
 Unit Log; {In LogDateien schreiben}
 Interface
 
+Type
+ PLog = ^TLog;
+ TLog =
+  object
+  Constructor Init(LogName : String; _Banner : String; Perm: Word);
+  Destructor Done;
+
+  Procedure WriteLn(ToWrite: String);
+  Procedure SetCurLevel(NewLevel : Byte);
+  Procedure SetLogLevel(NewLevel : Byte);
+  Procedure SetScrLevel(NewLevel : Byte);
+
+  Private
+  
+  F: Text;
+  FName: String;
+  ProgId: String[8];
+  Banner: String[80];
+  FilePerm: Word;
+  CurLevel: Byte;
+  LogLevel: Byte;
+  ScrLevel: Byte;
+  End;
+
+ 
+
+Implementation
+
 Uses
 {$IfDef Linux}
  Linux,
 {$EndIf}
- Types, GeneralP;
+ DOS;
 
 Const
- Binkley              = 1;
- FD                   = 2;
- DBridge              = 3;
- Opus                 = 4;
-
-
-Procedure LogDone;
-Function OpenLog(LogType : Byte; LogName : String80; ProgID : String8; Banner : String80) : Byte;
-Procedure CloseLog(Handle : Byte);
-Procedure LogWriteLn(Handle : Byte; ToWrite : String);
-Procedure LogSetCurLevel(Handle : Byte; NewLevel : Byte);
-Procedure LogSetLogLevel(Handle : Byte; NewLevel : Byte);
-Procedure LogSetScrLevel(Handle : Byte; NewLevel : Byte);
-
-Implementation
-Uses DOS;
+ BinkChars: Array[1..5] of char = '!+:# ';
+ MonthNames: Array[1..12] of String[3] =
+  ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
+  'Nov', 'Dec');
+ DayNames: Array[0..6] of String[3] =
+  ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 
 Type
+ TimeTyp =
+  Record
+  Year, Month, Day, DayOfWeek: Word;
+  Hour, Min, Sec, Sec100: Word;
+  End;
 
-{PTextBuf = ^TTextBuf;
-TTextBuf = array[0..127] of Char;
-TTextRec = record
-  Handle:    Word;
-  Mode:      Word;
-  BufSize:   Word;
-  Private:   Word;
-  BufPos:    Word;
-  BufEnd:    Word;
-  BufPtr:    PTextBuf;
-  OpenFunc:  Pointer;
-  InOutFunc: Pointer;
-  FlushFunc: Pointer;
-  CloseFunc: Pointer;
-  UserData:  array[1..16] of Byte;
-  Name:      array[0..79] of Char;
-  Buffer:    TTextBuf;
-end;}
 
-             PLogFile      =    ^TLogFile;
-             TLogFile      =    Record
-                                Datei : Text;
-                                Name: String80;
-                                LogType : Byte;
-                                ProgID : String8;
-                                Banner : String80;
-                                CurLevel : Byte;
-                                LogLevel : Byte;
-                                ScrLevel : Byte;
-                                end;
-
-             PLogFileArray =    ^TLogFileArray;
-             TLogFileArray =    Array[1..255] of PLogFile;
-
-Const BinkChars            :    Array[1..5] of char = '!+:# ';
-      FDChars              :    Array[1..5] of char = '     ';
-      DBridgeChars         :    Array[1..5] of char = '     ';
-      MonthNames           :    Array[1..12] of String[3] =
-                                ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-      DayNames             :    Array[0..6] of String[3] =
-                                ('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-
+{$IfDef VIRTUALPASCAL}
+Procedure Today(Var Date: TimeTyp);
 Var
-    LogFiles : TLogFileArray;
-    xyz      : Byte;
-    Date     : TimeTyp;
+ Y, M, D, DOW: LongInt;
+ 
+ Begin
+ GetDate(Y, M, D, DOW);
+ Date.Year := Y;
+ Date.Month := M;
+ Date.Day := D;
+ Date.DayOfWeek := DOW;
+ End;
 
-Function Date2BinkStr(Date:TimeTyp) : String10;
-var s:String[10];
-begin
-Str(Date.Day,s);
-If (Byte(s[0]) = 1) then s := '0' + s;
-Date2BinkStr:=s + ' ' + MonthNames[Date.Month];
-end;
+{$Else}
+Procedure Today(Var Date : TimeTyp);
+ Begin
+ With Date do DOS.GetDate(Year, Month, Day, DayOfWeek);
+ End;
+{$EndIf}
 
-Function Date2FDStr(Date:TimeTyp) : String20;
-var s,s2:String[10];
-begin
-s := DayNames[Date.DayOfWeek] + ' ';
-Str(Date.Day,s2);
-If (Byte(s2[0]) = 1) then s2 := '0' + s2;
-s := s + s2 + ' ' + MonthNames[Date.Month] + ' ';
-Str(Date.Year,s2);
-If (Byte(s2[0]) = 1) then s2 := '0' + s2;
-Date2FDStr:=s + ' ' + s2;
-end;
+{$IfDef VIRTUALPASCAL}
+Procedure Now(Var Time: TimeTyp);
+Var
+ H, M, S, S100: LongInt;
 
-Function Date2DBridgeStr(Date : TimeTyp) : String20;
-  Function Word2Str(n: word): string8;
-  var s: string8;
-  begin
-  str(n,s);
-  if n < 10 then s := '0'+s;
-  Word2Str := s;
-  end;
+ Begin
+ GetTime(H, M, S, S100);
+ Date.Hour := H;
+ Date.Min := M;
+ Date.Sec := S;
+ Date.Sec100 := S100;
+ End;
 
-begin
-With Date do Date2DBridgeStr := Word2Str(Month)+'/'+Word2Str(Day)+'/'+copy(Word2Str(Year),3,2);
-end;
+{$Else}
+Procedure Now(Var Time: TimeTyp);
+ Begin
+ With Time do DOS.GetTime(Hour, Min, Sec, Sec100);
+ End;
+{$EndIf}
 
-Function Time2Str(Time:TimeTyp) : String10;
+Function Date2BinkStr(Date: TimeTyp) : String;
+Var
+ s: String[10];
+ 
+ Begin
+ Str(Date.Day, s);
+ If (Length(s) = 1) then s := '0' + s;
+ Date2BinkStr:= s + ' ' + MonthNames[Date.Month];
+ End;
+
+Function Time2Str(Time:TimeTyp) : String;
 var s,s2:String[10];
 begin
 Str(Time.Hour,s2);
@@ -122,141 +115,74 @@ If (Byte(s2[0]) = 1) then s2 := '0' + s2;
 Time2Str:=s+s2;
 end;
 
-Procedure Init;
-Var
- i: Byte;
 
+Constructor TLog.Init(LogName : String; _Banner : String; Perm: Word);
  Begin
- For i := 1 to 255 do LogFiles[i] := NIL;
- End;
-
-Procedure LogDone;
-var i : Byte;
-begin
-For i := 1 to 255 do If LogFiles[i] <> nil then CloseLog(i);
+ Assign(F, LogName);
+ {$I-} Append(F); {$I+}
+ If (IOResult <> 0) then
+  Begin
+  Assign(F, LogName);
+  {$I-} ReWrite(F); {$I+}
+  End;
+ If (IOResult = 0) then
+  Begin
+  FName := LogName;
+  Banner := _Banner;
+  FilePerm := Perm;
+  ProgID := 'PROTICK';
+  LogLevel := 5;
+  CurLevel := 2;
+  ScrLevel := 0;
+  TLog.WriteLn('begin, ' + Banner);
+  End
+ Else Fail;
 end;
 
-
-Function OpenLog(LogType : Byte; LogName : String80; ProgID : String8; Banner : String80) : Byte;
-var i : Byte;
-begin
-For i := 1 to 255 do If LogFiles[i] = nil then begin
-    New(LogFiles[i]);
-    LogFiles[i]^.Name := LogName;
-    Assign(LogFiles[i]^.Datei, LogName);
-    {$I-} Append(LogFiles[i]^.Datei); {$I+}
-    If IOResult <> 0 then
-     Begin
-     Assign(LogFiles[i]^.Datei, LogName);
-     {$I-} ReWrite(LogFiles[i]^.Datei); {$I+}
-     End;
-    If (IOResult = 0) then begin
-       LogFiles[i]^.LogType := LogType;
-       LogFiles[i]^.ProgID := ProgID;
-       LogFiles[i]^.Banner := Banner;
-       LogFiles[i]^.LogLevel := 5;
-       LogFiles[i]^.CurLevel := 2;
-       LogFiles[i]^.ScrLevel := 0;
-       Case LogType of
-            Binkley : LogWriteLn(i, 'begin, ' + Banner);
-            Opus    : LogWriteLn(i, 'begin, ' + Banner);
-            FD      : begin
-                      Today(Date);
-                      Write(LogFiles[i]^.Datei, '----------  ', Date2FDStr(Date), ', ');
-                      WriteLn(LogFiles[i]^.Datei, Banner);
-                      end;
-            end;
-       OpenLog := i;
-       Exit;
-       end
-    Else begin
-         OpenLog := 0;
-         Exit;
-         end;
-    end;
-end;
-
-Procedure CloseLog(Handle : Byte);
-begin
-If LogFiles[Handle] = nil then exit;
-LogFiles[Handle]^.CurLevel := 2;
-Case LogFiles[Handle]^.LogType of
-     Binkley, Opus : LogWriteLn(Handle, 'end, ' + LogFiles[Handle]^.Banner + #10#10);
-     end;
-{$I-} Close(LogFiles[Handle]^.Datei); {$I+}
-If IOResult <> 0 then WriteLn('Kann LogFile ', LogFiles[Handle]^.Name,
-                              ' nicht schliessen!')
-Else
+Destructor TLog.Done;
  Begin
+ CurLevel := 2;
+ TLog.WriteLn('end, ' + Banner + #10#10);
+ {$I-} Close(F); {$I+}
+ If (IOResult <> 0) then System.WriteLn('Cannot close logfile!')
+ Else
+  Begin
 {$IfDef Linux}
- ChMod(LogFiles[Handle]^.Name, FilePerm);
+  ChMod(FName, FilePerm);
 {$EndIf}
+  End;
  End;
-Dispose(LogFiles[Handle]);
-LogFiles[Handle] := Nil;
-end;
 
-Procedure LogWriteLn(Handle : Byte; ToWrite : String);
+Procedure TLog.WriteLn(ToWrite : String);
 Var
   Error: Integer;
+  Date: TimeTyp;
 
-begin
-If LogFiles[Handle] = nil then exit;
-With LogFiles[Handle]^ do begin
-     Case LogType of
-          Binkley, Opus : begin
-                          Now(Date);
-                          Today(Date);
-                          If (ScrLevel >= CurLevel) then
-                             WriteLn(BinkChars[CurLevel], ' ',
-                                Date2BinkStr(Date), ' ', Time2Str(Date), ' ',
-                                ProgID, ' ', ToWrite);
-                          If (LogLevel >= CurLevel) then
-                             {$I-} WriteLn(Datei, BinkChars[CurLevel], ' ',
-                                Date2BinkStr(Date), ' ', Time2Str(Date), ' ',
-                                ProgID, ' ', ToWrite); {$I+}
-                          Error := IOResult;
-                          end;
-          FD            : begin
-                          Now(Date);
-                          If (ScrLevel >= CurLevel) then
-                             WriteLn(FDChars[CurLevel], ' ', Time2Str(Date), '  ', ToWrite);
-                          If (LogLevel >= CurLevel) then
-                             {$I-} WriteLn(Datei, FDChars[CurLevel], ' ', Time2Str(Date), '  ', ToWrite); {$I+}
-                          Error := IOResult;
-                          end;
-          DBridge       : begin
-                          Now(Date);
-                          Today(Date);
-                          If (ScrLevel >= CurLevel) then
-                          WriteLn(Date2DBridgeStr(Date), ' ', Copy(Time2Str(Date), 1, 5), ' ', ToWrite);
-                          If (LogLevel >= CurLevel) then
-                          {$I-} WriteLn(Datei, Date2DBridgeStr(Date), ' ', Copy(Time2Str(Date), 1, 5), ' ', ToWrite); {$I+}
-                          Error := IOResult;
-                          end;
-          end;
-     end;
-end;
+ Begin
+ Now(Date);
+ Today(Date);
+ If (ScrLevel >= CurLevel) then System.WriteLn(BinkChars[CurLevel], ' ',
+  Date2BinkStr(Date), ' ', Time2Str(Date), ' ', ProgID, ' ', ToWrite);
+ If (LogLevel >= CurLevel) then {$I-} System.WriteLn(F, BinkChars[CurLevel], ' ',
+  Date2BinkStr(Date), ' ', Time2Str(Date), ' ', ProgID, ' ', ToWrite); {$I+}
+ Error := IOResult;
+ End;
 
-Procedure LogSetCurLevel(Handle : Byte; NewLevel : Byte);
-begin
-If LogFiles[Handle] = nil then exit;
-LogFiles[Handle]^.CurLevel := NewLevel;
-end;
+Procedure TLog.SetCurLevel(NewLevel : Byte);
+ Begin
+ CurLevel := NewLevel;
+ End;
 
-Procedure LogSetLogLevel(Handle : Byte; NewLevel : Byte);
-begin
-If LogFiles[Handle] = nil then exit;
-LogFiles[Handle]^.LogLevel := NewLevel;
-end;
+Procedure TLog.SetLogLevel(NewLevel : Byte);
+ Begin
+ LogLevel := NewLevel;
+ End;
 
-Procedure LogSetScrLevel(Handle : Byte; NewLevel : Byte);
-begin
-If LogFiles[Handle] = nil then exit;
-LogFiles[Handle]^.ScrLevel := NewLevel;
-end;
+Procedure TLog.SetScrLevel(NewLevel : Byte);
+ Begin
+ ScrLevel := NewLevel;
+ End;
 
 
-begin
-Init;
-end.
+Begin
+End.

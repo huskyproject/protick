@@ -1,28 +1,38 @@
 #!/usr/bin/make -f
-#PASOPT = -dFIDOCONF -dUNIX -Fu../fidoconfig -Fu../smapi -k'-L/husky/lib'
-PASOPT = -dUNIX
+PASOPT = -dUNIX -dDEBUG -Fu../fidoconfig -Fu../smapi -k'-L/husky/lib'
 
-all: debug
+all: protick pttoss ptffix ptnfh ptunpack ptpack pthatch ptmaint ptffind
 
-protick: protick.pas mkglobt.pas mkmisc.pas mkmsgabs.pas mkmsgfid.pas \
- mkmsgezy.pas mkmsgjam.pas mkmsghud.pas mkmsgsqu.pas types.pas generalp.pas \
- crc.pas log.pas inifile.pas ptregkey.pas tickcons.pas ticktype.pas \
- ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas ptconf.pas \
- ../fidoconf.pas
+protick: protick.pas
 	ppc386 $(PASOPT) protick.pas
 
-debug:
-	ppc386 $(PASOPT) -dDEBUG protick.pas
+pttoss: pttoss.pas log.pas
+	ppc386 $(PASOPT) pttoss.pas
 
-release:
-	ppc386 $(PASOPT) -dRELEASE protick.pas
+ptffix: ptffix.pas log.pas
+	ppc386 $(PASOPT) ptffix.pas
 
-ptfconf:
-	ppc386 $(PASOPT) ptfconf.pas
+ptnfh: ptnfh.pas log.pas
+	ppc386 $(PASOPT) ptnfh.pas
+
+ptunpack: ptunpack.pas log.pas
+	ppc386 $(PASOPT) ptunpack.pas
+
+ptpack: ptpack.pas log.pas
+	ppc386 $(PASOPT) ptpack.pas
+
+pthatch: pthatch.pas log.pas
+	ppc386 $(PASOPT) pthatch.pas
+
+ptmaint: ptmaint.pas log.pas
+	ppc386 $(PASOPT) ptmaint.pas
+
+ptffind: ptffind.pas log.pas
+	ppc386 $(PASOPT) ptffind.pas
 
 clean:
 	-rm *.o *.ppu *.a *~
 
 distclean: clean
-	-rm protick genkey
+	-rm protick pttoss ptffix ptnfh ptunpack ptpack pthatch ptmaint ptffind
 

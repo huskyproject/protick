@@ -72,7 +72,6 @@ Chrs
 NLS
 - unit
 - National Language Support
-- perhaps using GNU gettext
 - formats like "argument 1: %1, argument 3: %3, argument 2: %2\n"
 
 Template
@@ -106,7 +105,7 @@ BTree
 - PChar-B-Tree
 - Address+Pointer-B-Tree
 
-Toss
+PTToss
 - program
 - ScanForTICs
 - read TIC (using unit TIC)
@@ -123,7 +122,7 @@ Toss
 - write magics from TIC to a configurable file (add/replace appropriate line)
 - execute script after single files / each file
 
-FileFix
+PTFFix (FileFix)
 - program
 - forward requests to uplinks
 - %From
@@ -134,15 +133,15 @@ FileFix
 - response templates
 - ReScan
 
-NFH (NewFilesHatch)
+PTNFH (NewFilesHatch)
 - program
 - Exclude
 
-UnPack
+PTUnPack
 - program
 - look for archives in inbound and unpack them
 
-Pack
+PTPack
 - program
 - pack TICs and files in outbound
   - AllFix-style
@@ -150,18 +149,19 @@ Pack
   - MTic-style
 - readArcList
 
-Hatch
+PTHatch
 - program
 - command-line
 - ncurses-interface
 
-Maint
+PTMaint
 - program
 - remove obsolete passthrough-files
 - purge Dupes (using unit Dupes)
 - purge old files from filebase
+- remove old archives from outbound
 
-FileFind
+PTFFind (FileFind)
 - answer to echomail search requests like AllFix
 
 ProTick

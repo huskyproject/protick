@@ -1,33 +1,3 @@
 To do:
-before 1.0:
-- charset conversion
-- linelength > 255 in FILES.BBS
-- extract & use FILE_ID.DIZ / lsm, order TIC / DIZ / LSM configurable
-- forward requests to uplinks
-- Remote maintenance (area create etc.)
-  - list of all areas with connected users
-- %From
-- write netmail on errors (with definable level)
-- set files in filebase to date in TIC or of file in inbound (if not in TIC)
-- check size (compare size in TIC with real size of file)
-
-after 1.0:
-- split up into several small programs (one for Hatch, one for Toss, one for
-  Pack, ...)
-- FidoConfig
-- User-Defaults
-- %Info
-- Notify
-- write magics from TIC to a configurable file (add/replace appropriate line)
-- areaname masks like "BBS-*" for all BBSNet-Areas
-  (<one AKA, multiple groups>-problem)
-- NewFilesHatch: Exclude
-- all responses in one msg
-- Templates
-- Purging
-- reformat descriptions
-- ReScan
-- FileFind-System
-- language file
-- execute script after single files / each file
+- everything :)
 
