@@ -349,3 +349,7 @@ Version 0.9beta2
 * FileUMask and DirUMask now working
 * moving/copying file as lowercase to inbound when hatching
 
+Version 0.9beta3
+- ignoring date in Tics from FileScan (yet another workaround for bugs in
+  other programs :( )
+

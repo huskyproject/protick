@@ -170,13 +170,13 @@ Procedure Assign ( Var T: Text; Name: String255 );
 Var
   B: BindingType;
 
-begin (* Assign *)
+begin
   unbind ( T );
   B:= binding ( T );
   B.Name:= Name + chr ( 0 );
   bind ( T, B );
   B:= binding ( T );
-end (* Assign *);
+end
 
 Procedure FillChar ( Var Dest: Void; Count: Integer; C: Char );
 
@@ -186,17 +186,17 @@ Type
 Var
   p, q: BytePtr;
 
-begin (* FillChar *)
-  (*$W-*)  (* Warning "dereferencing `void *' pointer" is a minor bug in GPC *)
+begin
+  {$W-}  (* Warning "dereferencing `void *' pointer" is a minor bug in GPC *)
   p:= @Dest;
-  (*$W+*)
+  {$W+}
   q:= BytePtr ( LongInt ( p ) + Count );
   while LongInt ( p ) < LongInt ( q ) do
     begin
       p^:= ord ( C );
       LongInt ( p ) := LongInt(p) + 1;
-    end (* while *);
-end (* FillChar *);
+    end
+end
 
 Function rtsParamCount: Integer;
 AsmName '_p_paramcount';
@@ -205,24 +205,21 @@ Function rtsParamStr ( i: Integer; Var S: String255 ): Boolean;
 AsmName '_p_paramstr';
 
 
-Function ParamCount: Integer;  (* This is stupid. *)
-
-begin (* ParamCount *)
+Function ParamCount: Integer; 
+begin
   ParamCount:= rtsParamCount - 1;
-end (* ParamCount *);
+end
 
 
 Function ParamStr ( i: Integer ): String255;
-
 Var
   S: String255;
-
-begin (* ParamStr *)
+begin
   if rtsParamStr ( i, S ) then
     ParamStr:= Trim ( S )
   else
     ParamStr:= '';
-end (* ParamStr *);
+end;
 
 
 Function CGetEnv ( Entry: __CString__ ): PChar;
@@ -230,12 +227,11 @@ AsmName 'getenv';
 
 
 Function GetEnv ( Entry: String255 ): String255;
-
 Var
   C: PChar;
   Contents: String255;
 
-begin (* GetEnv *)
+begin
   C:= CGetEnv ( Entry );
   Contents:= '';
   if C <> Nil then
@@ -244,17 +240,16 @@ begin (* GetEnv *)
       begin
         Contents:= Contents + C^;
         LongInt ( C ) := LongInt(C)+1;
-      end (* while *);
+      end 
   GetEnv:= Contents;
-end (* GetEnv *);
+end;
 
 Function UpCase ( Ch: Char ): Char;
-
-begin (* UpCase *)
+begin
   if ( Ch >= 'a' ) and ( Ch <= 'z' ) then
     dec ( Ch, ord ( 'a' ) - ord ( 'A' ) );
   UpCase:= Ch;
-end (* UpCase *);
+end;
 
 { Convert a "C" string to a "Pascal" string }
 function StrPas(Src: CString): String255;
@@ -305,7 +300,7 @@ Function _itoa (value: integer; s: cstring; radix: integer): CString; C;
 Function _ltoa (value: LongInt; s: cstring; radix: integer): CString; C;
 Function _ultoa (value: ULong; s: cstring; radix: integer): CString; C;
 
-{$EndIf GPC}
+{$ENDIF GPC}
 
 
 Procedure Delay(secs: Word);

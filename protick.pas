@@ -628,6 +628,13 @@ Var
         LogWriteLn(LogHandle, 'App '+Tic^.App[Tic^.NumApp]);
         End;
       End;
+
+    If (Pos('BY FILESCAN', UpStr(Tic^.CreatedBy)) = 1) then
+      Begin
+      Tic^.Date := 0;
+      LogSetCurLevel(LogHandle, 3);
+      LogWriteLn(LogHandle, 'Tic created by FileScan - ignoring date');
+      End;
     End; {ParseTIC}
 
   Begin {Toss}
