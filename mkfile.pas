@@ -161,10 +161,6 @@ Function  MakePath(FP: String): Boolean;
 
 Implementation
 
-{$IfNDef FPC}
-Uses Crt;
-{$EndIf}
-
 
 Procedure FindObj.Init;
   Begin

@@ -102,9 +102,7 @@ function StrPCopy(Dest: CString; Src: String): CString;
 Function Exec(prog, params: String255): Integer;
 {$EndIf GPC}
 
-{$IfDef FPC}
 Procedure Delay(secs: Word);
-{$EndIf}
 
 {$IfNDef SPEED}
 Procedure GetFTime2(var f; var Year, Month, Day, Hour, Min, Sec: Word);
@@ -139,6 +137,7 @@ Function IntToStr(x: LongInt):String255;
 Function IntToStr0(x: LongInt):String255;
 Function IntToStr03(x: Word):String3;
 Function StrToInt(s: String255): LongInt;
+Function OctalStrToInt(s: String255): LongInt;
 Function FileExist(fn: String255):Boolean;
 Function DirExist(fn: String255):Boolean;
 Function LastPos(SubStr, S: String255): Byte;
@@ -309,7 +308,6 @@ Function _ultoa (value: ULong; s: cstring; radix: integer): CString; C;
 {$EndIf GPC}
 
 
-{$IfDef FPC}
 Procedure Delay(secs: Word);
 Var
  i: Word;
@@ -318,7 +316,6 @@ Var
  {bogus delay}
  For i := 1 to 10000 do Write;
  End;
-{$EndIf}
 
 
 Function LowCase(Ch:Char):Char;
@@ -738,6 +735,43 @@ Var
  Begin
  Val(s, x, Error);
  If (Error <> 0) then StrToInt := 0 Else StrToInt := x;
+ End;
+
+Function OctalStrToInt(s: String255): LongInt;
+Var
+ Result: LongInt;
+ CurPos: Byte;
+ Pot8: LongInt;
+ CurNum: Byte;
+ Error: Byte;
+
+ Begin
+ Result := 0;
+ Pot8 := 1;
+ for CurPos := 1 to length(s) do
+   Begin
+   Case s[CurPos] of
+     '0': CurNum := 0;
+     '1': CurNum := 1;
+     '2': CurNum := 2;
+     '3': CurNum := 3;
+     '4': CurNum := 4;
+     '5': CurNum := 5;
+     '6': CurNum := 6;
+     '7': CurNum := 7;
+     '8': CurNum := 8;
+     '9': CurNum := 9;
+     else
+       Begin
+       CurNum := 0;
+       Error := CurPos;
+       End;
+     End;
+
+   Result := Result + (Pot8 * CurNum);
+   Pot8 := Pot8 * 8;
+   End;
+ If (Error = 0) then OctalStrToInt := Result Else OctalStrToInt := -1;
  End;
 
 Function FileExist(fn: String255):Boolean;
@@ -1284,7 +1318,7 @@ Begin
 {$IfDef Linux}
 If (DOS.GetEnv('UMASK') <> '') then
  Begin
- FilePerm := Octal(StrToInt(DOS.GetEnv('UMASK')));
+ FilePerm := OctalStrToInt(DOS.GetEnv('UMASK'));
  FilePerm := 511 and not FilePerm;
  DirPerm := FilePerm;
  End

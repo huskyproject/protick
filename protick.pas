@@ -616,7 +616,7 @@ Var
       Else If (Pos('PW ', UpStr(Line)) = 1) or (Pos('PW:', UpStr(Line)) = 1) then
         Begin
         Delete(Line, 1, 3);
-        Tic^.Pwd := UpStr(KillLeadingSpcs(Line));
+        Tic^.Pwd := UpStr(KillSpcs(Line));
         {LogSetCurLevel(LogHandle, 5);
         LogWriteLn(LogHandle, 'PassWord '+Tic^.Pwd);}
         End
@@ -2169,13 +2169,16 @@ Procedure Maint;
   Begin
   WriteLn('Maint');
   WriteLn;
-  WriteLn('Calling PurgeArchs');
+  LogSetCurLevel(loghandle, 5);
+  LogWriteLn(loghandle, 'Calling PurgeArchs');
   Outbound^.PurgeArchs;
-  WriteLn('Calling DelPT');
+  LogSetCurLevel(loghandle, 5);
+  LogWriteLn(loghandle, 'Calling DelPT');
   DelPT;
-  WriteLn('Calling PurgeDupes');
+  LogWriteLn(loghandle, 'Calling PurgeDupes');
   PurgeDupes;
-  WriteLn('Done');
+  LogSetCurLevel(loghandle, 5);
+  LogWriteLn(loghandle, 'Done');
   End;
 
 Procedure _Pack;

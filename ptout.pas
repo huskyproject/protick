@@ -7,9 +7,6 @@ Uses
 {$IfDef Linux}
  Linux,
 {$EndIf}
-{$IfDef DOS}
- CRT,
-{$EndIf}
  DOS,
  Types, GeneralP,
  Log,
@@ -183,6 +180,8 @@ Constructor tBTOutbound.Init(_Cfg: PTickCfg; _lh: Byte; _BaseDir: String;
  lh := _lh;
  BaseDir := _BaseDir;
  PrimAKA := _PrimAKA;
+ LogSetCurLevel(lh, 5);
+ LogWriteLn(lh, 'BaseDir = "'+_BaseDir+'"/"'+BaseDir+'"');
  End;
 
 Destructor tBTOutbound.Done;
@@ -400,7 +399,9 @@ Var
 
 Procedure tBTOutbound.PurgeArchs;
  Begin
- WriteLn('Calling PurchArchsDir("', Copy(BaseDir, 1, LastPos(DirSep, BaseDir)-1), '")');
+{ LogSetCurLevel(lh, 5);
+ LogWriteLn(lh, 'BaseDir = "'+BaseDir+'"');
+ LogWriteLn(lh, 'Calling PurchArchsDir("'+ Copy(BaseDir, 1, LastPos(DirSep, BaseDir)-1)+ '")');}
  PurgeArchsDir(Copy(BaseDir, 1, LastPos(DirSep, BaseDir)-1));
  End;
 
@@ -414,25 +415,28 @@ Var
   l: Byte;
 
  Begin
- WriteLn('tBTOutbound.PurgeArchsDir("'+Dir+'") called');
+{ LogSetCurLevel(lh, 5);
+ LogWriteLn(lh, 'tBTOutbound.PurgeArchsDir("'+Dir+'") called');}
  SRec.Name := Dir + DirSep+ '*.*';
- WriteLn('Calling FindFirst("', SRec.Name, ', AnyFile, SRec)');
+{ LogWriteLn(lh, 'Calling FindFirst("'+ SRec.Name+ ', AnyFile, SRec)');}
  FindFirst(SRec.Name, AnyFile, SRec);
  While (DosError = 0) do
   Begin
-  WriteLn('DosError = 0');
+  LogSetCurLevel(lh, 5);
+{  LogWriteLn(lh, 'DosError = 0');}
   l := Length(SRec.Name);
-  WriteLn('Length(SRec.Name) = ', l);
+{  LogWriteLn(lh, 'Length(SRec.Name) = '+ IntToStr(l));}
   If (SRec.Attr and Directory) = 0 then
    Begin
-   WriteLn('not Directory');
+   LogSetCurLevel(lh, 5);
+{   LogWriteLn(lh, 'not Directory');}
    If (SRec.Name[l-3] = '.') and (UpCase(SRec.Name[l-2]) = 'C') then
     Begin
-    WriteLn('*.[Cc]?? found');
+{    LogWriteLn(lh, '*.[Cc]?? found');}
     If not ((SRec.Name[l-1] < '0') or (SRec.Name[l-1] > '9')
      or (SRec.Name[l] < '0') or (SRec.Name[l] > '9')) then
      Begin
-     WriteLn('*.[Cc][0-9][0-9] found');
+{     LogWriteLn(lh, '*.[Cc][0-9][0-9] found');}
      If (GetFSize(Dir + DirSep + SRec.Name) = 0) then
       Begin
       Write('Deleting '+Dir + DirSep + SRec.Name+'...');
@@ -449,10 +453,12 @@ Var
    End
   Else
    Begin
-   WriteLn('Directory');
+{   LogSetCurLevel(lh, 5);
+   LogWriteLn(lh, 'Directory');}
    If (SRec.Name[1] <> '.') then PurgeArchsDir(Dir + DirSep + SRec.Name);
    End;
-  WriteLn('Calling FindNext');
+  LogSetCurLevel(lh, 5);
+{  LogWriteLn(lh, 'Calling FindNext');}
   FindNext(SRec);
   End;
  End;
@@ -715,23 +721,19 @@ Var
    BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
    TimeCreated := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
    UnixToDT(TimeCreated, DT);
-   WriteLn('TimeCreated = ', Date2Str(DT), ' ', Time2Str(DT));
 
    BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
    BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
    TimePacked := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
    UnixToDT(TimePacked, DT);
-   WriteLn('TimePacked = ', Date2Str(DT), ' ', Time2Str(DT));
 
    BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
    BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
    ReservedLong := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
-   WriteLn('ReservedLong = ', ReservedLong);
 
    BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
    BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
    PackRecovery := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
-   WriteLn('PackRecovery = ', PackRecovery);
 
    Seek(STQ, 1024); {0-based => pos = 1025}
    ValidQueue := True;
@@ -808,7 +810,6 @@ Var
  BlockRead(STQ, Min, 1);
  BlockRead(STQ, Maj, 1);
  EntryLen := Word(Min) + (Word(Maj) * 256);
- WriteLn('EntryLen = ', EntryLen);
 
  If (EntryLen >= 15) then
   Begin
@@ -816,35 +817,29 @@ Var
   BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
   EntryTime := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
   UnixToDT(EntryTime, DT);
-  WriteLn('EntryTime = ', Date2Str(DT), ' ', Time2Str(DT));
 
   BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
   BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
   Flags := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
-  WriteLn('Flags = ', WordToHex(word(Flags SHR 16))+WordToHex(word(Flags mod 65536)));
 
   BlockRead(STQ, Long1, 1); BlockRead(STQ, Long2, 1);
   BlockRead(STQ, Long3, 1); BlockRead(STQ, Long4, 1);
   TimeStamp := (LongInt(Long1) + (LongInt(Long2) * 256)) + ((LongInt(Long3) + (LongInt(Long4) * 256)) * 65536);
   UnixToDT(TimeStamp, DT);
-{  WriteLn('TimeStamp = ', Date2Str(DT), ' ', Time2Str(DT)); }
 
   BlockRead(STQ, Address[0], 1);
   If (Byte(Address[0]) > 0) then BlockRead(STQ, Address[1], Byte(Address[0]));
-  WriteLn('Address = "', Address, '"');
 
   If (EntryLen > (Byte(Address[0])+14)) then
    Begin
    BlockRead(STQ, Filename[0], 1);
    If (Byte(Filename[0]) > 0) then BlockRead(STQ, Filename[1], Byte(Filename[0]));
-   WriteLn('Filename = "', Filename, '"');
 
    If (EntryLen >= (Byte(Address[0])+Byte(Filename[0])+15)) then
     Begin
     BlockRead(STQ, TFA[0], 1);
     If (EntryLen = (Byte(Address[0])+Byte(Filename[0])+15)) then TFA[0] := Char(0);
     If (Byte(TFA[0]) > 0) then BlockRead(STQ, TFA[1], Byte(TFA[0]));
-    WriteLn('TFA = "', TFA, '"');
 
     {skip last bytes if entry is too long}
     If (EntryLen > (Byte(Address[0])+Byte(Filename[0])+Byte(TFA[0])+15)) then
@@ -1062,4 +1057,6 @@ Var
  End;
 
 
+Begin
 End.
+

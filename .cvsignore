@@ -7,9 +7,13 @@ protick.dsk
 protick.psm
 protick.exe
 rtm.exe
+*.tpp
+*.tpu
+*.PPU
+PROTICK.TP
 PROTICK.DSK
 PROTICK.PSM
-PROTICK.TP
 PROTICK.EXE
+RTM.EXE
 *.TPP
 *.TPU

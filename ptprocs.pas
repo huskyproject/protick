@@ -439,7 +439,7 @@ Var
  {add DownLoadCounter}
  If (Cfg^.AddDLC) then
   Begin
-  Write(FilesTMP, '['+Copy('0000000000', 1, Cfg^.DLCDig)+']');
+  Write(FilesTMP, '['+Copy('0000000000', 1, Cfg^.DLCDig)+'] ');
   End;
  {write description}
  If (Desc <> NIL) and (Desc^[0] > #0) then

@@ -10,16 +10,14 @@ else
   PASOPT = -dUNIX -Fu$(INCDIR) -dRELEASE
 endif
 
-PASOPT = -dUNIX
-
-all: debug
+all: protick
 
 PASFILES= protick.pas mkglobt.pas mkmisc.pas mkmsgabs.pas mkmsgfid.pas \
  mkmsgezy.pas mkmsgjam.pas mkmsghud.pas mkmsgsqu.pas types.pas generalp.pas \
  crc.pas log.pas inifile.pas ptregkey.pas tickcons.pas ticktype.pas \
- ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas ptconf.pas
+ ptprocs.pas ptvar.pas ptmsg.pas ptcfg.pas ptout.pas
 
-#protick: $(PASFILES) $(INCDIR)/fidoconf.pas
+#protick: $(PASFILES) ptfconf.pas $(INCDIR)/fidoconf.pas
 protick: $(PASFILES)
 	ppc386 $(PASOPT) protick.pas
 

@@ -337,6 +337,7 @@ Version 0.9beta1
 + Hatch: now checking if the area exists, using the address from the area
   for From, To and Origin
 + preliminary fidoconfig-support
++ added Magic-Support to PTFLG
 
 ----- cvs ci ------
 Thu Oct 16 13:40:00 MET DST 1999

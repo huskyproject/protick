@@ -1303,14 +1303,14 @@ Procedure ParseCfg;
 
     If (ReadEntry('GENERAL', 'FILEUMASK') <> '') then
      Begin
-     FilePerm := StrToInt(RepEnv(ReadEntry('GENERAL', 'FILEUMASK')));
+     FilePerm := OctalStrToInt(RepEnv(ReadEntry('GENERAL', 'FILEUMASK')));
      FilePerm := 511 and not FilePerm;
      End
     Else FilePerm := 493; {Octal 755}
 
     If (ReadEntry('GENERAL', 'DIRUMASK') <> '') then
      Begin
-     DirPerm := StrToInt(RepEnv(ReadEntry('GENERAL', 'DIRUMASK')));
+     DirPerm := OctalStrToInt(RepEnv(ReadEntry('GENERAL', 'DIRUMASK')));
      DirPerm := 511 and not DirPerm;
      End
     Else DirPerm := FilePerm;

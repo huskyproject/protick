@@ -56,9 +56,6 @@ Uses MKFile
  {$IfDef OPRO}
  , OpCRT
  {$Else}
-  {$IfNDef FPC}
- , CRT
-  {$EndIf}
  {$EndIf}
 {$EndIf}
 ;
