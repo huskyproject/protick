@@ -400,6 +400,7 @@ Var
 
 Procedure tBTOutbound.PurgeArchs;
  Begin
+ WriteLn('Calling PurchArchsDir("', Copy(BaseDir, 1, LastPos(DirSep, BaseDir)-1), '")');
  PurgeArchsDir(Copy(BaseDir, 1, LastPos(DirSep, BaseDir)-1));
  End;
 
@@ -413,18 +414,25 @@ Var
   l: Byte;
 
  Begin
+ WriteLn('tBTOutbound.PurgeArchsDir("'+Dir+'") called');
  SRec.Name := Dir + DirSep+ '*.*';
+ WriteLn('Calling FindFirst("', SRec.Name, ', AnyFile, SRec)');
  FindFirst(SRec.Name, AnyFile, SRec);
  While (DosError = 0) do
   Begin
+  WriteLn('DosError = 0');
   l := Length(SRec.Name);
+  WriteLn('Length(SRec.Name) = ', l);
   If (SRec.Attr and Directory) = 0 then
    Begin
+   WriteLn('not Directory');
    If (SRec.Name[l-3] = '.') and (UpCase(SRec.Name[l-2]) = 'C') then
     Begin
+    WriteLn('*.[Cc]?? found');
     If not ((SRec.Name[l-1] < '0') or (SRec.Name[l-1] > '9')
      or (SRec.Name[l] < '0') or (SRec.Name[l] > '9')) then
      Begin
+     WriteLn('*.[Cc][0-9][0-9] found');
      If (GetFSize(Dir + DirSep + SRec.Name) = 0) then
       Begin
       Write('Deleting '+Dir + DirSep + SRec.Name+'...');
@@ -439,7 +447,12 @@ Var
      End;
     End;
    End
-  Else If (SRec.Name[1] <> '.') then PurgeArchsDir(Dir + DirSep + SRec.Name);
+  Else
+   Begin
+   WriteLn('Directory');
+   If (SRec.Name[1] <> '.') then PurgeArchsDir(Dir + DirSep + SRec.Name);
+   End;
+  WriteLn('Calling FindNext');
   FindNext(SRec);
   End;
  End;
