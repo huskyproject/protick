@@ -1,0 +1,491 @@
+[GENERAL]
+; path and filename of logfile
+; Log=<Filename>
+Log=/husky/log/pt.log
+;
+; LogLevel - 0: log nothing ... 5: debug
+; LogLevel=<n>
+LogLevel=4
+;
+; DispLevel - 0: display nothing ... 5: debug
+; DispLevel=<n>
+DispLevel=4
+;
+; create directories if they do not already exist
+; CreateDirs=<Yes|No>
+CreateDirs=No
+;
+; protected inbound
+; InBound=<path>
+InBound=/husky/in/protect
+;
+; outbound type
+; currently only "BT" (Binkley Domain) is supported
+; OBType=<BT|FD|TMail>
+OBType=BT
+;
+; outbound
+; BT: outbound of primary zone and domain
+; FD: <filename of STQ>,<filename of lockfile>
+; TMail: no meaning
+; OutBound=<path>
+OutBound=/husky/out/zone
+;OutBound=z:/tmp/filqueue.fd,z:/tmp/filqueue.lck
+;
+; where to place the TICs
+; TicOut=<path>
+TicOut=/husky/out/tic
+;
+; where to look for and create netmails
+; NetMail=<Type><Path>
+; Type: F for *.MSG, S for Squish, J JAM, E EzyCom, H Hudson
+NetMail=F/husky/netmail
+;
+; directory to move bad TICs and related files to
+; Bad=<path>
+Bad=/husky/files/bad
+;
+; where to create ProTick.BSY
+; FlagDir=<Path>
+FlagDir=/husky/work
+;
+; directory for passtrough files
+; PassThrough=<path>
+PassThrough=/husky/files/passthrough
+;
+; Your name
+; SysOp=<name>
+SysOp=Sascha Silbe
+;
+; name of your BBS
+; BBS=<name>
+BBS=Programmers BBS
+;
+; Check TICs for destination (workaround for a "bug" in FileScan)
+; CheckDest=<Yes|No>
+CheckDest=No
+;
+; indent descriptions in FILES.BBS <n> positions
+; DescPos=<n>
+DescPos=13
+;
+; char put before long descriptions in FILES.BBS
+; if empty, space is used
+;LDescChar=<char>
+LDescChar=
+;
+; add a download count (e.g. "[00]") to the description of the file
+;AddDLCount=<Yes|No>
+AddDLCount=No
+;
+; download count has <n> digits (1: "[0]", 2: "[00]", ...)
+; default is 2 digits
+;DLCountDigits=<n>
+DLCountDigits=3
+;
+; write description on single line in FILES.BBS (up to 255 chars)
+;SingleDescLine=<Yes|No>
+SingleDescLine=No
+;
+; delete areafix requests
+; DelReq=<Yes|No>
+DelReq=No
+;
+; delete areafix responses
+; DelRsp=<Yes|No>
+DelRsp=No
+;
+; password for files to one of your AKAs
+; LocalPwd=<Password>
+LocalPwd=SECRET
+;
+; allow directory names > 8 chars
+; LongDirNames=<Yes|No>
+LongDirNames=No
+;
+; split up areanames into several directories, e.g. linux_node becomes
+; linux/node
+; SplitDirs=<Yes|No>
+SplitDirs=Yes
+;
+; maximum age of entries in DupeBase (80 bytes per entry)
+; MaxDupeAge=<age in days>
+MaxDupeAge=365
+;
+; filename of areas.log (areas with new files)
+; AreasLog=<filename>
+AreasLog=/husky/work/pt/areas.log
+;
+; filename of bbsarea.log (areas with new files, uses BBSArea-Field as
+; areaname)
+; BBSAreaLog=<filename>
+BBSAreaLog=/husky/work/pt/bbsarea.log
+;
+; filename of msgid-sequencer-file
+; MsgIDFile=<filename>
+MsgIDFile=/husky/work/msgid.dat
+;
+; filename of dupebase
+; DupeFile=<filename>
+DupeFile=/husky/work/pt/protick.dup
+;
+; filename of longname.lst
+; LongNameLst=<filename>
+LongNameLst=/husky/work/pt/longname.lst
+;
+; filename of newareas.pt
+; NewAreasLst=<filename>
+NewAreasLst=/husky/work/pt/newareas.pt
+;
+; filename of arc.lst
+; ArcLst=<filename>
+ArcLst=/husky/work/pt/arc.lst
+;
+; filename of pt.lst
+; PTLst=<filename>
+PTLst=/husky/work/pt/pt.lst
+;
+FileUMask=133
+;
+DirUMask=022
+;
+[MGRNAMES]
+; names to respond to
+; MgrName=<name>
+MgrName=FileFix
+MgrName=FileMgr
+MgrName=ProTick
+MgrName=AllFix
+MgrName=UTic
+MgrName=UTick
+MgrName=FileScan
+MgrName=MegaTic
+MgrName=MegaTick
+MgrName=MTic
+MgrName=MTick
+MgrName=Ticer
+MgrName=Ticker
+;
+[ARCNAMES]
+; name of archives to unpack before tossing
+; Syntax:  ArcName=<FileSpec>,unpacker index
+; example: ArcName=1234*.LZH,1
+; or:      ArcName=*.c0*,0
+;
+; if unpacker index "0" is undefined (in section UNPACKER), every unpacker
+; is called for archives with unpacker index "0", so you do not need a
+; General Unpack Shell. If you use a GUS you should set its index to 0.
+;
+ArcName=*.c0?,0
+ArcName=*.c1?,0
+ArcName=*.c2?,0
+ArcName=*.c3?,0
+ArcName=*.c4?,0
+ArcName=*.c5?,0
+ArcName=*.c6?,0
+ArcName=*.c7?,0
+ArcName=*.c8?,0
+ArcName=*.c9?,0
+ArcName=a_f????l.zh?,1
+ArcName=a_f????z.ip?,2
+ArcName=a_f????r.ar?,3
+ArcName=f_a????l.zh?,1
+ArcName=f_a????z.ip?,2
+ArcName=f_a????r.ar?,3
+ArcName=fm_????l.zh?,1
+ArcName=fm_????z.ip?,2
+ArcName=fm_????r.ar?,3
+ArcName=to_????l.zh?,1
+ArcName=to_????z.ip?,2
+ArcName=to_????r.ar?,3
+ArcName=mt!*.l??,1
+ArcName=mt!*.z??,2
+ArcName=mt!*.r??,3
+ArcName=f56b0cdd.zip,2
+;
+[GROUPS]
+; group definitions
+; Syntax:  Group=<GroupNumber (starting at 1)>,<Description>
+; example: Group=1,Fido
+;
+Group=1,Fido
+Group=2,PB
+;
+[ANNOUNCEGROUPS]
+; Announce configuration
+; Syntax:  Group=<GroupNumber (starting at 1)>,<Description>
+;          Area=<Type><Path/File>
+;          (see "NetMail" in section GENERAL)
+;          Subj=<Subject>
+;          From=<FromName>, <FromAddr>
+;          To=<ToName>, <ToAddr>
+;          Type=<EchoMail|NetMail>
+;          HeaderFile=<HeaderFile>
+;          FooterFile=<FooterFile>
+;
+; example: Group=1,PB.Announce Fido
+;          Area=S/husky/echo/pb.ann.all
+;          Subj=Fido
+;          From=%SysOp%, 2:2435/424
+;          To=All, 2:2435/424
+;          Type=EchoMail
+;          HeaderFile=/husky/cfg/protick.ann.hdr
+;          FooterFile=/husky/cfg/protick.ann.ftr
+;
+Group=1,PB.Ann.All Fido
+Area=S/husky/echo/pb.ann.all
+Subj=Fido
+From=Sascha Silbe, 2:2435/424
+To=All, 2:2435/424
+HeaderFile=/husky/cfg/protick.ann.hdr
+FooterFile=/husky/cfg/protick.ann.ftr
+;
+Group=2,PB.Ann.All LDK
+Area=S/husky/echo/pb.ann.all
+Subj=LDK
+From=Sascha Silbe, 2:2435/424
+To=All, 2:2435/424
+HeaderFile=/husky/cfg/protick.ann.hdr
+FooterFile=/husky/cfg/protick.ann.ftr
+;
+;
+[PACKER]
+; Packer definitions
+; Syntax:  Packer=<Index (starting at 1)>,<FileExtension>,<commandline>
+; macros in <commandline>:
+; %A Archive name (e.g. 098301A8.LZH)
+; %F name of list of files to add to archive (e.g. arclist.tmp)
+; you may also use environmental variables like "%Tmp%".
+; example: Packer=1,ZIP,ZIP.EXE -9b %Tmp% %A %F
+;
+;Packer=1,lzh,DoLZH.Cmd %A %F
+Packer=2,zip,zip -0jD@ %A < %F
+Packer=3,rar,rar a -std -ep -y -m0 -w/tmp/ %A @%F
+;
+[UNPACKER]
+; UnPacker definitions
+; Syntax: UnPacker=<Index>,<FileExtension>,<commandline>
+; macros in <commandline>:
+; %A Archive name (e.g. 098301A8.LZH)
+; %D Directory to unpack to (e.g. c:/inbound)
+; you may also use environmental variables like "%Tmp%".
+; example: UnPacker=1,ZIP,UNZIP.EXE -n %A -d %D
+; index 0 is used for a GUS (General Unpack Shell)
+;
+UnPacker=1,lzh,lha ef %A
+UnPacker=2,zip,unzip -LnjC %A -d %D
+UnPacker=3,rar,rar e -std -y -c- -w/tmp/ %A %D -o-
+;
+[ADDRESSES]
+; address definitions
+; Syntax:  Addr=<zone>:<net>/<node>[.<point>][@<domain>]
+; example: Addr=2:2435/424
+;
+Addr=2:2435/424
+Addr=235:100/0
+;
+[DOMAINS]
+; domain definitions
+; Syntax:  Domain=<domain>,<abbrev>
+; <domain> is the full domain, <abbrev> is the name of the outbound directory
+; Example: Domain=fidonet.org,fidonet
+;
+;Domain=fidonet.org,fidonet
+;Domain=elektronet,enet
+;
+[FILEAREAS]
+;
+; Syntax: Area=<name>
+;         BBSArea=<name>
+;         Desc=<description>
+;         path=<path>
+;         MoveTo=<Path for old files>
+;         ReplaceExt=<extension>
+;         (files with extension are deleted if a new file with the same base
+;         name is tossed. Examples: ReplaceExt=* ; "XYZ.ZIP" exists ; "ABC.ZIP"
+;         arrives: no file is deleted. "XYZ.RAR" arrives: "XYZ.ZIP" is deleted.)
+;         Group=<groupindex>
+;         Announce={Announcegroups}
+;         Level=<Level>
+;         Addr=<Address to use>
+;         Flags={Dupe/DupeCheck|CRC|Rem/Remote/RemoteChange|New/Hatch/
+;           NewFilesHatch|Touch|Man/Mandatory|NoPause|Hid/Hidden|
+;           PT/PassThrough}
+;         LastHatch=<(last date NewFilesHatch was executed) as Unix-TimeStamp (Hex)>
+;
+;Area=AutoCreate:0
+;; Defaults for areas autocreated in group 0
+;Desc=Area autoadded
+;path=/husky/files
+;MoveTo=/husky/files/old
+;ReplaceExt=
+;Group=1
+;Announce=16,1
+;Level=30
+;Addr=2:2435/424
+;Flags=Dupe, CRC, Rem
+;
+Area=AutoCreate:1
+; Defaults for areas autocreated in group 1
+Desc=Area autoadded
+path=/husky/files
+MoveTo=/husky/files/old
+ReplaceExt=
+Group=1
+Announce=16,1
+Level=30
+Addr=2:2435/424
+Flags=Dupe, CRC, Rem
+;
+Area=AutoCreate:2
+Desc=Area autoadded
+path=/husky/files
+MoveTo=/husky/files/old
+ReplaceExt=
+Group=2
+Announce=17,2
+Level=30
+Addr=235:100/0
+Flags=Dupe, CRC, Rem
+;
+;
+Area=NODEDIFF
+BBSArea=Fido.NodeDiff
+Desc=Weekly NodeList Updates
+path=/husky/files/nodediff
+MoveTo=/husky/files/old
+Group=1
+Announce=16,1
+Level=30
+Addr=2:2435/424
+LastHatch=3333EA79
+Flags=Dupe, CRC, Rem
+;
+Area=24000
+BBSArea=Fido.24000
+Desc=Pointliste und Diff's dazu
+path=/husky/files/24000
+MoveTo=/husky/files/old
+Group=1
+Announce=16,1
+Level=30
+Addr=2:2435/424
+LastHatch=33350E0F
+Flags=Dupe, CRC, Rem
+;
+Area=LDK_NODELIST
+BBSArea=LDK.Nodelist
+path=/husky/files/ldk/nodelist
+MoveTo=/husky/files/old
+Group=2
+Announce=17,2
+Level=30
+Addr=235:100/37
+LastHatch=334FADDF
+Flags=Dupe, CRC, Rem
+;
+;
+[USER]
+; Syntax: User=<name>
+;         Addr=<address>
+;         ArcAddr=<address>
+;         OwnAddr=<address>
+;         Active=<Yes|No>
+;         Groups={Groups}
+;         Level=<Level>
+;         Flags={SendTIC|Notify|AC/AutoCreate|Admin|NMAnn/NMAnnounce}
+;         Mail=<Normal|Hold|Direct|Crash>
+;         Pwd=<password>
+;         Sends=<Yes|No>
+;         Receives=<Yes|No>
+;         PackTICs=<Yes|No>
+;         PackFiles=<Yes|No>
+;         May={Connect|DisConnect|Pause|Pwd|Compression|TIC|Notify|ReScan>
+;         Packer=<packerindex>
+;         AutoCreate=<group to create areas in (area AutoCreate:<this value> is
+;           used for defaults>
+;         Area=<Name>[, <R|S|RS>]
+;
+User=Manfred Weber
+Addr=2:2435/22
+Area=24000, S
+Area=NODEDIFF, S
+Active=Yes
+Groups=1,255
+Level=30
+Flags=SendTIC, AutoCreate
+Mail=Normal
+Pwd=SECRET
+Sends=Yes
+Receives=No
+PackTICs=Yes
+PackFiles=Yes
+May=Connect, Disconnect, Pause, Pwd, Compression, TIC, Notify, Rescan
+Packer=2
+AutoCreate=1
+; AutoCreate areas in group 1
+;
+User=SysOp-Point
+Addr=2:2435/424.99
+Area=24000, R
+Area=NODEDIFF, R
+Active=Yes
+Groups=1,255
+Level=90
+Flags=SendTIC
+Mail=Normal
+Pwd=SECRET
+Sends=No
+Receives=Yes
+PackTICs=Yes
+PackFiles=Yes
+May=Connect, Disconnect, Pause, Pwd, Compression, TIC, Notify, Rescan
+Packer=2
+;
+;
+User=Michael Weitzel
+Addr=235:300/0
+Active=Yes
+Groups=2
+Level=30
+Flags=SendTIC, AutoCreate
+Mail=Normal
+Pwd=SS011298
+Sends=Yes
+Receives=No
+PackTICs=No
+PackFiles=No
+May=Connect, Disconnect, Pause, Pwd, Compression, TIC, Notify, Rescan
+Packer=2
+AutoCreate=2
+Area=LDK_VEREIN, S
+Area=LDK_NODELIST, S
+Area=LDK_LDKOM, S
+Area=LDK_FILES, RS
+Area=LDK_INTERN, S
+;
+;
+;
+;
+[UPLINKS]
+; uplinks where areas we do not have can be requested (not implemented yet)
+; Syntax: UpLink=<Description>
+;         ConfMgr=<name to write to>
+;         Addr=<address to write to>
+;         Group=<groupindex>
+;         (only users within this group can use this uplink. 0=all)
+;         Level=<Level>
+;         Pwd=<password to use>
+;         Unconditional=<Yes|No>
+;         (do not check AreaList to determine if area is available at this uplink)
+;         AreaList=<filename of list with all areas available from this uplink>
+;
+UpLink=Fido (2:2435/40)
+ConfMgr=FileFix
+Addr=2:2435/40
+Group=1
+Level=30
+Pwd=SECRET
+Unconditional=No
+AreaList=/husky/24350040.fil
+;
