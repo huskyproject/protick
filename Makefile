@@ -17,9 +17,6 @@ debug:
 release:
 	ppc386 $(PASOPT) -dRELEASE protick.pas
 
-ptfconf:
-	ppc386 $(PASOPT) ptfconf.pas
-
 clean:
 	-rm *.o *.ppu *.a *~
 

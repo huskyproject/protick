@@ -470,14 +470,14 @@ Var
         Begin
         Delete(Line, 1, 5);
         Val(KillLeadingSpcs(Line), Tic^.Size, Error);
-        LogSetCurLevel(LogHandle, 5);
+        LogSetCurLevel(LogHandle, 4);
         LogWriteLn(LogHandle, 'Size '+IntToStr(Tic^.Size));
         End
       Else If (Pos('DATE ', UpStr(Line)) = 1) or (Pos('DATE:', UpStr(Line)) = 1) then
         Begin
         Delete(Line, 1, 5);
         Val('$' + KillLeadingSpcs(Line), Tic^.Date, Error);
-        LogSetCurLevel(LogHandle, 5);
+        LogSetCurLevel(LogHandle, 4);
         LogWriteLn(LogHandle, 'Date '+ IntToStr(Tic^.Date));
         End
       Else If (Pos('CREATED ', UpStr(Line)) = 1) or (Pos('CREATED:', UpStr(Line)) = 1) then
