@@ -746,9 +746,10 @@ Var
  Error: Byte;
 
  Begin
+ Error := 0;
  Result := 0;
  Pot8 := 1;
- for CurPos := 1 to length(s) do
+ for CurPos := length(s) downto 1 do
    Begin
    Case s[CurPos] of
      '0': CurNum := 0;
