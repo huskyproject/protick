@@ -5,7 +5,7 @@ Interface
 {$EndIf}
 
 Uses
-{$IfDef OS2}
+{$IfDef SPEED}
   OS2Def,
 {$EndIf}
   Types, MKGlobT, GeneralP;

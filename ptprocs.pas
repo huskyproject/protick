@@ -106,7 +106,12 @@ Var
     Exec(GetEnv('COMSPEC'), '/C '+s);
     Error := DOSExitCode;
  {$Else}
+  {$IfDef FPC}
+    Exec(GetEnv('COMSPEC'), '/C '+s);
+    Error := DOSExitCode;
+  {$Else}
     Error := DOSExitCode(Exec(GetEnv('COMSPEC'), '/C '+s));
+  {$EndIf}
  {$EndIf}
 {$Else}
  {$IfDef UNIX}
@@ -202,7 +207,12 @@ Var
   Exec(GetEnv('COMSPEC'), '/C '+s);
   Error := DosExitCode;
  {$Else}
+  {$IfDef FPC}
+    Exec(GetEnv('COMSPEC'), '/C '+s);
+    Error := DOSExitCode;
+  {$Else}
   Error := DosExitCode(Exec(GetEnv('COMSPEC'), '/C '+s));
+  {$EndIf}
  {$EndIf}
 {$Else}
  {$IfDef UNIX}

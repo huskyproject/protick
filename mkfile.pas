@@ -8,12 +8,17 @@ Unit MKFile;
 Interface
 
 Uses Dos,
-{$IFDEF VirtualPascal}
+{$IfDef OS2}
+ {$IFDEF VirtualPascal}
      os2base, os2def, Strings,
-{$ENDIF}
-{$IFDEF SPEED}
+ {$ENDIF}
+ {$IFDEF SPEED}
      BseDOS, BseDev,
-{$ENDIF}
+ {$ENDIF}
+ {$IfDef FPC}
+     os2def, doscalls,
+ {$EndIf}
+{$EndIf}
 {$IfDef UNIX}
      linux,
 {$EndIf}
@@ -365,6 +370,7 @@ Function shReset(Var F: File; RecSize: Word): Boolean;
   End;
 
 {$IFDEF OS2}
+ {$IFDEF SPEED}
 procedure FlushFile(Var F);
 var handle,
     newhandle : LongInt {HFILE};
@@ -375,6 +381,12 @@ begin
   if DosDupHandle(handle, newHandle) = 0 then
     rc := DosClose(newHandle);
 end;
+ {$ELSE}
+procedure FlushFile(Var F);
+begin
+Flush(text(F));
+end;
+ {$ENDIF}
 {$ELSE}
  {$IFDEF FPC}
 procedure FlushFile(Var F);
@@ -428,13 +440,23 @@ var
 begin
   with lock do
     begin
+{$IFDEF SPEED}
       lOffset := LockStart;
       lRange := LockLength;
+{$ELSE}
+      Offset := LockStart;
+      Range := LockLength;
+{$ENDIF}
     end;
   with unlock do
     begin
+{$IFDEF SPEED}
       lOffset := 0;
       lRange := 0;
+{$ELSE}
+      Offset := 0;
+      Range := 0;
+{$ENDIF}
     end;
   LockFile := DosSetFileLocks(FileRec(F).Handle, unlock, lock, 1000, 0);
 end;
@@ -511,13 +533,23 @@ var
 begin
   with unlock do
     begin
+{$IFDEF SPEED}
       lOffset := LockStart;
       lRange := LockLength;
+{$ELSE}
+      Offset := LockStart;
+      Range := LockLength;
+{$ENDIF}
     end;
   with lock do
     begin
+{$IFDEF SPEED}
       lOffset := 0;
       lRange := 0;
+{$ELSE}
+      Offset := 0;
+      Range := 0;
+{$ENDIF}
     end;
   UnLockFile := DosSetFileLocks(FileRec(F).Handle, unlock, lock, 1000, 0);
 end;
@@ -1212,6 +1244,7 @@ Function  CreateTempDir(FN: String): String;
 {$ENDIF}
 
 {$IFDEF OS2}
+ {$IFDEF SPEED}
 function GetTempName(FN: String): String;
 
 var
@@ -1231,6 +1264,27 @@ begin
   until (nr = 1000) or not (fileexist(tmpstr+tmp));
   if nr <> 1000 then GetTempName := tmpstr+tmp else gettempname := '';
 end;
+ {$ELSE}
+function GetTempName(FN: String): String;
+
+var
+  TmpStr,
+  tmp : string;
+  nr : LongInt;
+
+begin
+  If ((Length(FN) > 0) and (FN[Length(FN)] <> DirSep)) Then
+    TmpStr := FN + DirSep
+  Else
+    TmpStr := FN;
+  nr := 0;
+  repeat
+  inc(nr);
+  str(nr, tmp);
+  until (nr = 1000) or not (fileexist(tmpstr+tmp));
+  if nr <> 1000 then GetTempName := tmpstr+tmp else gettempname := '';
+end;
+ {$ENDIF}
 
 {$ELSE}
  {$IfDef FPC}
