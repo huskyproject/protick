@@ -1,0 +1,299 @@
+History of ProTick:
+(- note, + added, * fixed)
+
+Version 0.3
+- partial rewrite of ProTick.Pas because SP/2 crashed it :(
++ DupeCheck
+
+Version 0.4
++ Hatch
+
+Version 0.5
+* silly bug in CompareAddress-function
+* some other bugs
++ NewFilesHatch
++ FILES.BBS-Handling
+
+Version 0.6beta1
+* some bugs :)
++ MsgBase-Interface
++ Maint
+  - delete sent archives
++ DupeCheck via Path
++ made CheckDestination deactivateable
+- restructured source code, DOS (DPMI) Version now possible
+- now up to 64kb descriptions instead of 256b
+- splitted Toss into Toss and Pack
+  - several files for one user are packed at a time now
+    -> much faster
+    - Attention! %F in Packer-definition has changed:
+      former: File
+      now: ListFile
+    - if your packer does not support listfiles, you have to use a tool,
+      e.g. LstFor (LSTFOR.ZIP at 2:2435/424):
+      Packer=1,LZH,LstFor %F LH32 a %A !F
+      You should not use such packers because it is much slower.
+- changed key structure
+  - registered users got new key
+
+Version 0.6beta2
+* bug in parser (Section: FileAreas, KeyWord: Announce (since announce is not
+  implemented yet, this is not important))
+* bug in forwarding procedure causing PT to crash when receiving files
+  in a area without connected users
+
+Version 0.7beta1
+* bug in SendTIC mixing up adresses
+* bug in Files.BBS-Handling: if no Files.BBS existed, SetDesc was aborted
+  instead of creating a new one.
+* bug in Files.BBS-Handling: if a Files.TMP existed it was appended instead
+  of overwriting it.
+* bug in Files.BBS-Handling: added <DescPos> spaces before
+  every char instead of every line
+* bug in NewFilesHatch (I HATE compilerbugs)
++ Announces
+- made key more secure
+  - registered users got new key
+  - old versions (0.6x) also run with new key
+
+Version 0.7beta2
+* bug in Scan: points are now identified correctly again
+* from is now in every TIC
++ origin-address in Hatch
+
+Version 0.7beta3
+- changed TIC names from '<8 hex letters>' to 'PT<6 hex letters>'
++ everything below tearline is ignored
++ everything below %quit is ignored
++ if DelReq is set to yes, areafix requests will be deleted
++ if DelRsp is set to yes, areafix requests will be set to Kill/Sent
++ DelReq, DelRsp config option
++ everything below %note is ignored, areafix request will not be deleted.
+
+Version 0.7beta4
+* missing comma in announce-definition of autocreated areas
+* AreaDesc was not initialized after each TIC
+
+Version 0.7beta5
+* when OriginAddress was set via cmdline parameters, zone was set to 0
+* path for autocreated areas could contain spaces
+* descriptions of announced files were shifted too far
+* some bugs in handling of description of announced files
++ LocalPwd config option
+  former behaviour: password of TICs from one of your AKAs was ignored
+  now:              password of TICs from one of your AKAs is compared
+                    with the one set as LocalPwd. Hatch will automatically
+                    use it, if you set ToAddress _and_ FromAddress to
+                    one (or two) of your AKAs.
+
+Version 0.7beta6
+* ALL filefix requests were killed
+* listed systems with wrong password could autocreate areas
++ added some messages to request processing
+
+Version 0.7beta7
+* small password bug (since beta6)
+
+Version 0.7beta8
++ NewAreas.PT (list of autocreated areas)
++ Areas.Log (list of processed areas)
+
+Version 0.7beta9
+* when trying to connect a area without downlinks via filefix, a GPF occured
+
+Version 0.7beta10
+* small bug in address parsing (since beta9)
+
+Version 0.7beta11
+* small bug in directory naming for autocreated areas: if the last substring
+  was longer than 8 characters, ProTick did a endless loop
+
+Version 0.7beta12
+- archives are now named like FlowFiles
+  (out\domain.001\00010001.pnt\00000001.c00 instead of out\zone\00010001.c00)
+
+Version 0.7beta13
+* updating files on a CD is now possible (changed DelFile(FileArea) +
+  MoveFile(InFile, FileArea) to ReplaceFile(InFile, FileArea))
+
+Version 0.7beta14
+* NewFilesHatch now works
+
+Version 0.7beta15
+* several bugs in ConnectArea / DisConnectArea (filefix)
++ %Query (filefix)
+
+Version 0.7beta16
+* few small bugs not appearing with SP/2 and BP but with VP/2
+* small bug in address parsing: a point address without domain was not parsed
+  correctly
+
+Version 0.7beta17
+- changed maximum size for domains from 8 chars to 12 chars (fidonet.org)
+- changed some internal structures to lower sizes
+  Attention: structure of ArcList has changed. Run "ProTick Pack" before
+  updating!
+
+Version 0.7beta18
+- renamed ProTick.Cfg in release archives to ProTick.Cf_
+- changed structure of KeyFile. Please get new keys from me.
+
+Version 0.8beta1
+* Maint now also deletes files in domain and point outbounds
+* caught some exceptions in message handling (file open exceptions)
+* memory hole (18060 Byte)
+* Addresses in AnnounceGroups had last character / digit missing
+* OS/2 only: Announces were not indented
+* Announce: Files from different file areas got mixed up
+* trailing/leading spaces in areafix requests are now ignored
+* filefix area-connect-requests were case-sensitive
+* bug in path-parsing causing some TICs to be erroneously treated as dupes
+* changed SIZE in TICs from hexadecimal to decimal
+* changed UnixDate in PATH from decimal to hexadecimal
++ switch LongDirNames: (dis)allow directory names > 8 chars
++ DispLevel
++ MsgID in FileFix responses and announces
+  Note: ProTick searches (and creates if it does not exist) a MsgID sequence
+  file in the directory declared in the environment variable "MSGID" or
+  if that is not defined in the Path where the config file is.
++ Exit with errorlevel:
+    0 no errors
+    1 No commandline parameters
+    2 unknown commandline parameter
+    3 config incomplete
+    4 no configfile found
+    5 could not open logfile
+    6 could not open ARC.LST
+    7 could not access DFUE.DLL
+    8 protick.bsy found
+    9 could not open PT.LST
++ PassThrough
+  Attention: Do NOT run ProTick Maint BEFORE ProTick Pack! Otherwise some
+  passthrough-files can get lost!
++ ArcAddr (TICs have destination address <addr> but are sent to <ArcAddr>)
++ AreaFix: %UNLINKED (send list of disconnected areas)
++ longname support: if "longname: " is the first word in Desc or LDesc[1], it
+  will be copied to LongName.Lst as "<Directory>,<shortname>,<longname>".
+  LongName.Lst is a textfile, so you can link <shortname> to <longname> on your
+  own.
++ MaxDupeAge: DupeBase-entries older than <maxdupeage> days are purged
++ BBSArea=<bbsarea>, BBSArea.Log: For every fileare you may define a
+  corresponding name for the area in the BBS which will be written to
+  BBSArea.Log (similar to Areas.Log). If not defined, the areaname will be
+  used.
++ OwnAddr: use origin address <ownaddr> for TICs to the user
+  Address priority:
+  OwnAddr -> AreaAddr -> destination address of TIC arrived -> none
+- Attention: structure of ArcList has changed. Run "ProTick Pack" before
+  updating!
+- Attention: structure of DupeBase has changed. Delete "ProTick.Dup" before
+  updating!
+- changed display format (now looks like Log)
+
+Version 0.8beta2
+* wrong address was displayed when sender of TIC was not connected to the
+  area and at least one user was connected to the area
++ writing FILES.LNG in every area
+  format of FILES.LNG:
+  <shortname> <longname>
++ evaluating archiver errorlevel
+  (found and fixed bug in SP/2 causing errorlevel 7 to be returned instead
+   of errorlevel 0)
++ TicOut: TICs are placed in TicOut instead of primary outbound
++ Linux version
+- CRCs are now logged in hex format
+- many changes for Linux version, especially converting filenames and hex
+  letters to lowercase
+
+Version 0.8beta3
+* LongDirNames was "Yes" as default
++ made SplitDirs deactivatable
+  split up areanames into several directories, e.g. linux_node becomes
+  linux\node
++ made filename of areas.log and bbsarea.log configurable
+  if not set, they are created in the same directory as the configfile
++ made filename of msgid.dat configurable
+  if not set, msgid.dat is looked for in %MSGID% and the directory of the
+  configfile
++ made filename of protick.dup configurable
+  if not set, protick.dup is created in the same directory as the configfile
+- protick.cfg is now looked for in the following directories:
+  current directory, %PT%, /etc/fido (Linux) / c:\fido (DOS / OS2)
+  protick.key is looked for in these directories:
+  current directory, directory of the EXE (DOS / OS2 only), %PT%,
+  /etc/fido (Linux) / c:\fido (DOS / OS2)
+
+Version 0.8beta4
+* if CRC-checking was disabled for an area, the CRC of the file was not
+  calculated but nevertheless it was checked
+* if no passthrough-path is set, PT will exit
++ added passthrough-path to sample configs :)
++ CreateDirs creates important directories if they do not exist
+
+Version 0.8beta5
+* TICs are now in CRLF-format (TICs created by the Linux version were LF only)
++ made filename of longname.lst configurable
+  if not set, longname.lst is created in the same directory as the configfile
++ made filename of newareas.pt configurable
+  if not set, newareas.pt is created in the same directory as the configfile
++ made filename of arc.lst configurable
+  if not set, arc.lst is created in the same directory as the configfile
++ made filename of pt.lst configurable
+  if not set, pt.lst is created in the same directory as the configfile
+
+Version 0.8beta6
+* small bug in *.msg-Source (since 0.8beta5)
+
+Version 0.8beta7
++ wrote a documentation (protick.doc)
++ support for domains longer than 8 characters (mapping to directory names)
+  Domains may now be up to 20 characters long.
++ netmail announces
+  if the flag "NMAnnounce" is set for a user, he will get a mail listing
+  the files sent to him.
+- Attention: structure of ArcList has changed. Run "ProTick Pack" before
+  updating!
+- changed key structure to make it portable
+  Please get a new key!
+
+Version 0.8beta8
+* Announces now also contain a origin (sorry, just forget that)
+* DescPos could not be set to 0
+* Squish-Netmailarea should work now (found workaround for a bug in MKMsg,
+  thanks to Sven Bursch!)
++ LDescChar
++ AddDLCount
++ DLCountDigits
+
+Version 0.8beta9
+* linked areas in user definitions are now case-insensitive
+* moving across devices (inbound on one partition, areapath on another
+  partition) now possible under Linux (YACB - Yet Another Compiler Bug)
+- ignoring CRs and LFs in configfile
+- ATTENTION: Squish-NM-Area does NOT work under Linux right now (although
+  said to work in Version 0.8beta8), rewrite of either MKMsg or my functions
+  needed to fix that. I probably will use smapi instead of MKMsg in future
+  versions.
+
+Version 0.8beta10
+* moving across devices should now be possible at last (YACB)
+
+Version 0.8beta11
+* files.bbs-handling: workaround for a bug in fpc causing too long
+  descriptions
++ OBType
++ experimental support for FD STQ
+- Linux only: DirUMask, FileUMask (permission mask to use for created
+  directories and created/changed files)
+  Attention: not used for message areas (Netmail area, announces)
+- rewrote outbound code
+- changed From-Name in AreaFix responses from "ProTick<version>" to "ProTick"
+
+Version 0.8beta12
+* archives in FD-outbound are now named correctly
+* DelRsp now also applies to netmail announces
+* message areas and netmail area are now closed correctly after writing
+  (netmail-)announces
+* rewrote files.bbs-code
++ added allfix2protick-converter to linux-version
+

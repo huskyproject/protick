@@ -1,0 +1,840 @@
+
+                                 P r o T i c k
+                                 =============
+
+
+Table of Contents
+-----------------
+
+1. Introduction
+1.1. License
+1.2. Features
+1.3. Executing ProTick
+1.3.1. Toss
+1.3.2. Scan
+1.3.3. Hatch
+1.3.4. NewFilesHatch
+1.3.5. Maint
+1.3.6. Pack
+1.3.7. Check
+1.4. Errorlevels
+2. Configuration
+3. FileFix
+4. Contacting the author, credits
+5. Where to get the latest versions
+
+
+1. Introduction
+---------------
+
+   ProTick is a so-called Ticker. It reads TIC-files and processes the
+   associated files following the information in the TIC. For a description
+   of the structure of these files, please read FSC-0028 (available as
+   FSC-0028.ZIP at 2:2435/424).
+   It still is in the beta-stadium, that means there may be many bugs
+   and not everything will work. If you experience problems or find bugs,
+   please contact me (see chapter 4).
+
+
+1.1. License
+------------
+
+   ProTick is MAILWARE. That means, you just have to write me a mail (EMail
+   or NetMail, see chapter 3) and you'll get a key.
+   I just want to know who uses ProTick and if it's worth to continue
+   developing it.
+   Of course it runs without a key, it just writes "unregistered" instead
+   of your serial number into the TICs. The BBSName also is set to
+   "unregistered" (used in announces).
+
+
+1.2. Features
+------------
+
+   Just some of them:
+
+   - Text-Config
+   - FileFix
+   - NewFilesHatch
+   - Announces
+   - List of autocreated areas (NEWAREAS.PT)
+   - List of processed areas (AREAS.LOG, BBSAREA.LOG)
+   - long directory name support
+   - FILES.LNG (List of 8.3-files and the corresponding long names) parallel
+     to FILES.BBS
+   - complete domain support
+   - (un-)packing of TICs and Files
+   - Passthrough
+   - LogLevel and DispLevel customizable
+   - Errorlevel evaluatable
+   - ArcAddr (TICs have destination <Addr> but are sent to <ArcAddr>)
+   - OwnAddr (set our address for each user)
+   - nearly everything customizable
+
+
+1.3. Executing ProTick
+----------------------
+
+   Syntax: ProTick <Command> [options]
+
+   Valid commands:
+   TOSS                          - Process TICs
+   SCAN                          - Scan for Mails
+   HATCH                         - Hatch file
+   NEWFILESHATCH                 - Hatch new files
+   MAINT                         - daily maintenance
+   PACK                          - create archives
+   CHECK                         - check config
+
+   options valid for all commands:
+   -D[ebug]                      - debug mode
+   -C<Config>                    - use <Config> as config
+
+
+1.3.1. Toss
+-----------
+
+   Processes incoming TICs.
+
+   Valid options:
+   -nodupe                      - do not check for dupes
+
+
+1.3.2. Scan
+-----------
+
+   Scans the netmail area for FileFix-requests.
+
+
+1.3.3. Hatch
+------------
+
+   Hatch a file. If no file is specified, this is interactive.
+   Valid options:
+
+   File=<File>                   - file
+   Area=<Area>                   - area
+   From=<Addr>                   - from-address
+   To=<Addr>                     - to-address
+   Origin=<Addr>                 - origin-address
+   Desc=<Desc>                   - description
+   Replace=<FileMask>            - files to replace
+   Move=<Yes|No|0|1|True|False>  - delete files after hatching
+   PW=<PassWord>                 - password
+
+
+1.3.4. NewFilesHatch
+--------------------
+
+   Hatch new files in areas which have the NewFilesHatch-flag set (see below).
+
+
+1.3.5. Maint
+------------
+
+   Daily maintenance:
+   - delete old archives (they are only truncated by the Mailer)
+   - delete sent passthrough-files
+   - remove entries in DupeFile older than <MaxDupeAge> days
+
+
+1.3.6. Pack
+-----------
+
+   Pack files and TICs.
+   The archives are named "<Net><Node>.c<number>", e.g. "098301a8.c00" for
+   2:2435/424.
+
+
+1.3.7. Check
+------------
+
+   Does nothing. Use to check the configfile.
+
+
+1.4. Errorlevels
+----------------
+
+   OK                                   0
+   no commands                          1
+   unknown command                      2
+   cfg read error                       3
+   cfg not found                        4
+   could not open Log                   5
+   could not open ArcList               6
+   could not create BusyFile            7
+   could not open passtrough-list       8
+
+
+2. Configuration
+----------------
+
+   The file "protick.cf_" contains a sample configuration for your operating
+   system. We'll discuss only the DOS configuration, but everything said
+   is also true for the other versions.
+
+   The configuration file is called "protick.cfg" and looked for in the
+   following directories:
+   current directory, %PT% (under Linux: ${PT}), /etc/fido (Linux) / c:\fido
+   (DOS, OS/2)
+
+   The key file is looked for in these directories:
+   current directory, directory of the EXE (DOS / OS/2 only), %PT% (Linux:
+   ${PT}), /etc/fido (Linux) / c:\fido (DOS / OS/2)
+
+
+>  [GENERAL]
+
+   This section contains global options.
+
+>  Log=%log%\PT.Log
+
+   This entry specifies the location (directory and filename) of the logfile.
+
+>  LogLevel=4
+
+   Log-events with a higher number are not written to the logfile.
+
+   Level        Description
+   --------------------------------------------------------------------------
+     1          fatal errors
+     2          important messages
+     3          normal messages
+     4          less important informations
+     5          debug informations
+
+>  DispLevel=4
+
+   Log-events with a higher number are not displayed on screen.
+
+>  CreateDirs=No
+
+   Creates directories (like inbound or area paths) if they do not exist.
+
+>  InBound=%dfue%\in\protect
+
+   The path to your protected inbound. This is where ProTick looks for
+   TICs and the files.
+
+>  OBType=BT
+
+   Outbound type. Currently only "BT" (Binkley Domain) is supported.
+   "FD" (FD STQ) is in development.
+
+>  OutBound=%dfue%\out\zone
+
+   OBType       Meaning of Outbound
+   --------------------------------------------------------------------------
+   BT           <Outbound directory of primary zone and domain>
+   FD           <filename of STQ>,<filename of lockfile>
+
+>  TicOut=%dfue%\out\tic
+
+   Outgoing TICs are stored here.
+
+>  NetMail=F%dfue%\netmail
+
+   Type and location of your (primary) netmail area. The first character
+   specifies the type, everything following the location.
+                                                .
+   Char Type    Location                        Example
+   F    *.msg   path                            Fz:\dfue\netmail
+   S    Squish  file (without ".sqd"!)          Sz:\dfue\netmail\netmail
+   J    JAM     file (without ".jdt"!)          Jz:\dfue\netmail\netmail
+   H    Hudson  3 decimal figures + path        H001z:\dfue\max\msg
+   E    Ezy     4 decimal figures + path        E0001z:\dfue\ezy\msg
+
+>  Bad=%dfue%\files\bad
+
+   Bad TICs and their files are moved into this directory.
+
+>  FlagDir=%Flags%
+
+   The Busy-File (protick.bsy) is created in this directory.
+   This file prevents the execution of multiple instances of ProTick.
+   Otherwise it would result in data loss.
+
+>  PassThrough=%dfue%\Files\Pass
+
+   PassThrough-Files (files in areas that are flagged as PassThrough)
+   are stored in this directory and deleted after transmission.
+   Do not put anything else in this directory!!!
+   Everything in this directory which is not found in PT.Lst will get
+   killed!
+
+>  SysOp=%SysOp%
+
+   This simply is your name.
+
+>  BBS=%BBS%
+
+   And this is the name of your BBS
+
+>  CheckDest=No
+
+   Check destination of TICs. FileScan does not set it properly, so
+   you may have to set it to "no".
+
+>  DescPos=13
+
+   Indent descriptions in FILES.BBS by <DescPos> characters.
+   Example: File "ABC.ZIP", Description-Lines "line1", "line2" and "line3"
+
+   DescPos=0
+   ABC.ZIP line1
+    line2
+    line3
+
+   DescPos=3
+   ABC.ZIP line1
+       line2
+       line3
+
+>  LDescChar=
+
+   This char is put before long descriptions in FILES.BBS. If it is not
+   set, it is set to " " (space).
+
+   Example: File "ABC.ZIP", Description-Lines "line1", "line2" and "line3"
+
+   LDescChar=+
+   ABC.ZIP line1
+   +line2
+   +line3
+
+   LDescChar=
+   ABC.ZIP line1
+    line2
+    line3
+
+>  AddDLCount=Yes
+
+   Add a download counter to the description in FILES.BBS.
+   Example: File "ABC.ZIP", Description "test-file"
+
+   Entry in FILES.BBS without download-counter:
+   ABC.ZIP test-file
+
+   with download-counter:
+   ABC.ZIP [00] test-file
+
+>  DLCountDigits=2
+
+   The number of digits of the download-counter (if enabled).
+   Example: File "ABC.ZIP", Description "test-file"
+
+   DLCountDigits=2
+   ABC.ZIP [00] test-file
+
+   DLCountDigits=3
+   ABC.ZIP [000] test-file
+
+>  DelReq=No
+
+   Delete FileFix requests after procession?
+
+>  DelRsp=No
+
+   Delete FileFix responses after procession?
+
+>  LocalPwd=XXX
+
+   This password is used for TICs directed to yourself (used for hatching).
+
+>  LongDirNames=No
+   Allow long directory names? (only enable this if EVERY program
+   that accesses the filebase is capable of using long directory names!)
+
+>  SplitDirs=Yes
+
+   Splits up areanames into several directories when autocreating areas.
+
+   Examples:
+   Areaname     SplitDirs       LongDirNames    Result
+   --------------------------------------------------------------------------
+   linux_node   Yes             No              linux\node
+   linux_node   Yes             Yes             linux\node
+   linux_node   No              Yes             linux_node
+   linux_node   No              No              linux_no
+
+   longareaname Yes             No              longarea
+   longareaname Yes             Yes             longareaname
+   longareaname No              Yes             longareaname
+   longareaname No              No              longarea
+
+>  MaxDupeAge=365
+
+   Entries in protick.dup that are older than <MaxDupeAge> days are removed.
+
+>  AreasLog=%DFUE%\pt\areas.log
+
+   Location of the list of processed areas (that is, areas where new files
+   have arrived).
+
+>  BBSAreaLog=%DFUE%\pt\bbsarea.log
+
+   Similar to AreasLog, but instead of the "real" areanames the names
+   specified in the BBSArea-Field of the areas are used. Useful if the
+   areas have a different name in the BBS (Example: Area "nodediff" is
+   called "Fido.nodediff" in BBS).
+   It can be used to compile the FILES.BBS' with FB if you use Maximus
+   (see FBPPT.CMD in the OS/2 version).
+
+>  MsgIDFile=%DFUE%\msgid.dat
+
+   This file contains the first available MsgID. Please set it to the
+   same file in all programs (otherwise every program would generate
+   own MsgIDs resulting in false dupes)!
+
+>  DupeFile=%DFUE%\pt\protick.dup
+
+   Location of the DupeList. Every file that arrives gets an entry in this
+   file and if it arrives a second time (due to problems at your uplink)
+   it is not processed again.
+
+>  LongNameLst=%DFUE%\pt\longname.lst
+
+   Location of the longname-list. If a file with a "longname:" in the
+   first line of the description arrives, the short name (the filename
+   of the file), the long name (everything after "longname:") and the
+   directory of the area will be written to this file. Every line is an
+   entry with the following structure: "<Directory>,<shortname>,<longname>".
+
+>  NewAreasLst=%DFUE%\pt\newareas.pt
+
+   This is a list a autocreated areas.
+
+>  ArcLst=%DFUE%\pt\arc.lst
+
+   If files and/or TICs for a DownLink are to be packed, they first
+   get an entry in this file. Later, when you call "protick pack", they
+   are packed into the archives.
+
+>  PTLst=%DFUE%\pt\pt.lst
+
+   PassThrough-Files are listed in this file. If such a file is sent to all
+   downlinks and all TICs are deleted, it will be killed by "protick maint"
+
+
+>  [MGRNAMES]
+>  MgrName=FileFix
+
+   ProTicks FileFix processes mails directed to any name listed in this
+   section (of course only when the mail is directed to one of your
+   addresses).
+
+
+>  [ARCNAMES]
+>  ArcName=*.c0*,0
+
+   If a file with the name specified is found, it will be unpacked with
+   the specified unpacker. If you set the unpacker to "0", every unpacker
+   will be tried (or the unpacker "0" will be used if it exists)
+
+
+>  [GROUPS]
+>  Group=1,General
+
+   In this section the group names are defined. They are only a reminder
+   to you, ProTick just uses the numbers.
+   The numbers start at 1.
+
+
+>  [ANNOUNCEGROUPS]
+
+   Now it's getting complex. But don't worry, it's easier as it looks like. :)
+   Here you define the AnnounceGroups. If a area is in such an announcegroup,
+   a mail will be written into a message area saying which files have arrived.
+   The numbers start at 1.
+
+>  Group=1,PB.Ann.All Fido
+
+   This starts the definition of a group. Again, the name is only for you.
+
+>  Area=S%DFUE%\Echo\PB\AnnAll
+
+   The message area where the mail will be written. See "Netmail" in the
+   "General"-section.
+
+>  Subj=Fido
+
+   The mail will get this subject.
+
+>  From=%SysOp%, 2:2435/424@fidonet
+
+   The sender of the mail will be set to this.
+
+>  To=All, 2:2435/424@fidonet
+
+   And that's the recipient of the mail
+
+
+>  [PACKER]
+
+   Let's define the packers!
+
+>  Packer=2,ZIP,ZIP -0jD@ -b %Tmp% %A < %F
+
+   The first part is an index used in the "ArcNames" section and the "Users"
+   section. The second part is the name used by the FileFix if a user
+   changes his packer. The last part is the call. "%A" will get replaced by
+   the archive name and "%F" by a file containing a list of the files
+   which shall be packed into the archive.
+   The numbers start at 1.
+
+
+>  [UNPACKER]
+>  UnPacker=1,LZH,LH32.EXE e %A %D /o
+
+   Similar to Packer. Instead of "%F", "%D" is the directory where the
+   files shall be unpacked to.
+   If an unpacker with the number 0 is defined, it will be used as GUS
+   (General Unpack Shell). See also [ARCNAMES] section.
+
+
+>  [ADDRESSES]
+>  Addr=2:2435/424@fidonet.org
+
+   Your addresses.
+
+>  [DOMAINS]
+>  Domain=fidonet.org,fidonet
+
+   If a domain is longer than 8 characters and/or contains a dot, it must
+   be mapped to a directory name in the outbound.
+   In this example the domain is "fidonet.org", but the directory is named
+   "fidonet".
+
+>  [FILEAREAS]
+
+   Now to the fileareas. :)
+
+>  Area=AutoCreate:0
+
+   The name of the area.
+   An area with the name "AutoCreate:<group>" defines the defaults for areas
+   autocreated in group <group>.
+
+>  BBSArea=<name>
+
+   This is the name written to BBSArea.Lst (see "BBSAreaLog" in
+   "General"-section)
+
+>  Desc=Area autoadded
+
+   Description of the area.
+
+>  Path=%dfue%\files
+
+   Path to the area.
+
+>  MoveTo=%dfue%\files\old
+
+   Old files (files replaced by new files) are moved to this directory. If
+   this path is not specified, the files will be killed.
+
+>  ReplaceExt=
+
+   Incoming files also replace files with this extension (may contain
+   wildcards).
+
+   Example:
+   ReplaceExt is set to "ZIP", the incoming file is "ABC.RAR".
+   If the file "ABC.ZIP" exists, it will be killed.
+
+   Useful if you convert archives.
+
+>  Group=1
+
+   The group this area belongs to.
+
+>  Announce=1,16
+
+   Incoming files are announced in these areas, see "AnnounceGroup"-section.
+
+>  Level=30
+
+   Downlinks with a lower Level than this cannot connect to this area
+   via FileFix.
+
+>  Addr=2:2435/424@fidonet
+
+   Use this address.
+
+>  Flags=Dupe, CRC, Rem
+                        .
+   Flag                 Description
+   --------------------------------------------------------------------------
+   DupeCheck            Check incoming files for dupes
+   CRC                  Check CRC of incoming files
+   RemoteChange         Downlinks may connect to this area via FileFix
+   NewFilesHatch        Hatch files newer than "LastHatch"
+   Touch                Set date of incoming files to the current date
+                        (not implemented)
+   Mandatory            Cannot be disconnected by Downlink via FileFix
+   NoPause              Files are sent to Downlinks even if they are
+                        set to passive
+   Hidden               does not appear in arealist (FileFix %LIST)
+   PassThrough          files are only passed through (to downlinks) but
+                        not stored locally
+
+>  LastHatch=<(last date NewFilesHatch was executed) as Unix-TimeStamp (Hex)>
+
+   The last date NewFilesHatch was executed (Hex-Unix-TimeStamp)
+
+
+>  [USER]
+
+   These are the Up/DownLinks.
+
+>  User=XXX
+
+   The name of the user.
+
+>  Addr=2:2435/40@fidonet
+
+   And his/her address.
+
+>  ArcAddr=2:2435/413@fidonet
+
+   TICs have destination <Addr> but are sent to <ArcAddr>.
+   Useful if you wish to send the files to the ISDN-Line of your uplink.
+
+>  Active=Yes
+
+   The user will only get files (and TICs, of course) if he is active
+   (exception: NoPassive is set for the filearea).
+
+>  Groups=1
+
+   He/She may connect to the areas in these groups.
+
+>  Level=30
+
+   But only to areas with a level smaller than or equal to Level.
+
+>  Mail=Normal
+
+   The name of this option is a bit confusing. It should be named "Flavour".
+   The outgoing files/TICs get this flavour (possible values: Normal,
+   Hold, Crash, Direct).
+
+>  Pwd=XXX
+
+   The password (used in TICs and for FileFix).
+
+>  Sends=Yes
+>  Receives=Yes
+
+   If he connects to an area via FileFix, the area will get these options
+   (see below).
+
+>  PackTICs=Yes
+>  PackFiles=Yes
+
+   Pack TICs/Files for this user?
+
+>  Packer=1
+
+   Packer to use if PackTICs and/or PackFiles is set to "Yes".
+
+>  AutoCreate=1
+
+   If the user may autocreate areas (see below), the areas will be created
+   in this group.
+
+>  May=Connect, Disconnect, Pause, Pwd, Compression, TIC, Notify, Rescan
+
+   FileFix options:
+
+   Flag         Description
+   --------------------------------------------------------------------------
+   Connect      May connect to areas
+   DisConnect   May disconnect from areas
+   Pause        May switch to passive and back
+   Pwd          May change the password
+   Compression  May change the packer
+   TIC          May enable/disable the SendTIC-flag
+   Notify       May enable/disable Notify
+   ReScan       May do rescan (not implemented yet)
+
+>  Flags=SendTIC, AutoCreate
+
+   Flag         Description
+   --------------------------------------------------------------------------
+   SendTIC      send TICs to this user
+   Notify       send notifies (not implemented yet)
+   AutoCreate   new areas are autocreated
+   Admin        may create/rename/delete Areas via FileFix
+   NMAnnounce   gets mails listing the files sent to him/her
+
+>  Area=24000, S
+
+   Is connected to this area. If "R" is set, he/she gets files from us,
+   if "S" is set, he/she may send us files (can be combined).
+
+
+>  [UPLINKS]
+
+   Requests are forwarded to this uplinks (not implemented yet).
+
+>  UpLink=Fido: XXX (2:2435/XXX)
+
+   Description of the uplink (only for you)
+
+>  ConfMgr=FileFix
+
+   Name of the FileFix of this uplink.
+
+>  Addr=2:2435/XXX@fidonet
+
+   Address to send the request to.
+
+>  Group=1
+
+   Only users which can access this group can use this uplink (0=all).
+
+>  Level=30
+
+   Users with a lower level cannot use this uplink.
+
+>  Pwd=XXX
+
+   Password to use for requests.
+
+>  Unconditional=No
+
+   Use AreaList?
+
+>  AreaList=z:\dfue\2435XXXX.fil
+
+   Requests are only forwarded if the area is listed in this file.
+
+>  DirUMask=022
+
+   Permission mask (three octal digits) for directories created by ProTick.
+   The resulting permission is (777 and (not DirUMask)). See also 'man chmod'.
+
+>  FileUMask=022
+
+   Permission mask (three octal digits) for files created/changed by ProTick.
+   The resulting permission is (777 and (not FileUMask)). See also 'man chmod'.
+
+
+3. FileFix
+----------
+
+   The users may change their configuration by sending mails to ProTick.
+   If ProTick finds a mail to one of your addresses and one of the names
+   listed in the MgrNames-section, it will process this mail.
+   The subject of the mail is used as password.
+
+
+   short summary:
+
+   Command         Description
+   --------------------------------------------------------------------------
+   %HELP           send help
+   %LIST           list of areas available to you
+   %QUERY          list of connected areas
+   %UNLINKED       list of disconnected areas
+   %PACK           \ on = pack all, off = pack none, files = pack files,
+   %COMPRESS       | tics = pack tics, Extension = set packer to use
+   %COMPRESSION    / examples: "%PACK ON", "%PACK ZIP"
+   %PAUSE          stop sending files (e.g. for holiday)
+   %RESUME         resume sending files (holiday over :) )
+   %QUIT           everything below (e.g. signature) is ignored
+   %NOTE           everything below is ignored, message will NOT be deleted
+   <Area>          connect area
+   +<Area>         connect area
+   -<Area>         disconnect area
+
+
+   %HELP
+
+   Sends a help text.
+
+   %LIST
+
+   Sends a list of all areas available to the user.
+
+   %QUERY
+
+   Sends a list of all areas the user is connected to.
+
+   %UNLINKED
+
+   Sends a list of all areas the user is NOT connected to.
+
+   %PACK, %COMPRESS, %COMPRESSION
+
+   Changes the packer and what to pack.
+
+      %PACK ON                  pack files and TICs
+      %PACK FILES               pack only files
+      %PACK TICS                pack only TICs
+      %PACK OFF                 pack nothing
+      %PACK <Extension>         change packer
+
+      Example:
+      %COMPRESS ZIP                 changes packer to ZIP
+
+   %PAUSE
+
+   Stop sending files and TICs (except in areas with NOPAUSE) to the user.
+
+   %RESUME
+
+   Resume sending files and TICs to the user.
+
+   %QUIT
+
+   Stop interpreting the mail. Everything below this is ignored.
+
+   %NOTE
+
+   Leave note to SysOp.
+   Similar to %QUIT, but the mail will never be killed, even if DelReq is
+   set to YES.
+
+   <Area>, +<Area>
+
+   Connect to <area>.
+
+   -<Area>
+
+   Disconnect from <area>.
+
+
+4. Contacting the author, credits
+---------------------------------
+
+   FidoNet: 2:2435/424
+   LinuxNet: 44:4935/0
+   EMail: Sascha.Silbe@ldknet.org
+   Phone: +49-6442-927669
+
+   Thanks go to (listed alphabetically):
+   Sven Bursch                  helped me with the Squish-Netmailarea
+   Andreas Gilsebach
+   Juergen Keller
+   Bernhard Schmidt
+   Martin Stahn                 wrote allfix2protick
+   Andreas Soehnel              tested FD STQ-support
+   and all the other beta-testers
+
+
+5. Where to get the latest versions
+-----------------------------------
+
+   You can get the latest version via:
+
+   FileRequest at 2:2435/424:
+        PT, PROTICK     - all versions
+        PTOS2           - OS/2 only
+        PTDOS           - DOS only
+        PTLNX           - Linux only
+
+   my Homepage: http://www.ldknet.org/~ssilbe
+
+
