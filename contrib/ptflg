@@ -10,7 +10,7 @@
 #
 
 PROGNAME=PTFLG
-PROGVERSION=1.0
+PROGVERSION=1.1
 
 # path and filename of protick.cfg
 PROTICKCFG=/husky/cfg/protick.cfg
@@ -26,6 +26,8 @@ DIRLIST=/husky/work/filearea.lst
 BASEPATH=/husky/files
 # filelist header
 HEADERFILE=/husky/cfg/filelist.head
+# this file is prepended to OKFILE
+MAGICFILE=/husky/cfg/magic.cfg
 # ifcico request-map
 REQMAP=/husky/cfg/reqmap
 # temporary reqmap
@@ -34,7 +36,6 @@ TEMPREQMAP=/husky/work/reqmap.tmp
 OKFILE=/husky/cfg/okfile.lst
 # temporary okfile
 TEMPOKFILE=/husky/cfg/okfile.lst.tmp
-
 
 echo $PROGNAME V$PROGVERSION
 
@@ -76,6 +77,7 @@ echo generating temporary reqmap, filelist and okfile
 # init files
 echo > ${TEMPREQMAP}
 echo @FILES $FILELIST > $TEMPOKFILE
+cat $MAGICFILE >> $TEMPOKFILE
 
 # copy static header to filelist
 cp ${HEADERFILE} ${TEMPFILELIST}
